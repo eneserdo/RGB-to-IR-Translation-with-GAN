@@ -1,18 +1,7 @@
-# bu network 2kx1k için yani aslında düşürülebilir bazı şeyler.
 import torch as t
 import torch.nn as nn
+from torchvision import models
 
-import functools
-from torch.autograd import Variable
-import numpy as np
-
-def weights_init(m):
-    classname = m.__class__.__name__
-    if classname.find('Conv') != -1:
-        m.weight.data.normal_(0.0, 0.02)
-    elif classname.find('BatchNorm2d') != -1:
-        m.weight.data.normal_(1.0, 0.02)
-        m.bias.data.fill_(0)
 
     # if len(gpu_ids) > 0:
     #     assert (torch.cuda.is_available())
@@ -22,11 +11,11 @@ def weights_init(m):
 
 ####### Generator #######
 
-class GlobalGenerator(nn.Module):
+class Generator(nn.Module):
     def __init__(self, input_nc, output_nc, ngf=64, n_downsampling=3, n_blocks=7, norm_layer=nn.InstanceNorm2d, padding_type='reflect', transposed=False):
 
         assert (n_blocks >= 0)
-        super(GlobalGenerator, self).__init__()
+        super(Generator, self).__init__()
         # activation = nn.ReLU(True)
         activation = nn.LeakyReLU()
 
@@ -159,8 +148,6 @@ class MultiScaleDisc(nn.Module):
 
 
 
-
-from torchvision import models
 
 class Vgg19(t.nn.Module):
     def __init__(self, requires_grad=False):
