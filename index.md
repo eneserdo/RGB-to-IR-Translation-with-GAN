@@ -1,4 +1,10 @@
+# Tset
+
+bala
+
 ## Welcome to GitHub Pages
+
+This project aims to create novel generative adversarial network model that can translate RGB image to the IR image
 
 You can use the [editor on GitHub](https://github.com/eneserdo/RGB-to-IR-Translation-with-GAN/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
