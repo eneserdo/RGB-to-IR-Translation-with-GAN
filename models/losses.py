@@ -57,7 +57,7 @@ class GanLoss(nn.Module):
 
         return None
 
-    def calc_GAN(self, output1, output2, is_real=True):
+    def forward(self, output1, output2, is_real=True):
 
         if not self.setted:
             self._set_tensors(output1, output2)
@@ -83,7 +83,7 @@ class FeatureMatchingLoss():
 
     def calc_FM(self, output1, output2):
         loss = 0
-        for i in range(1, len(output1)):
+        for i in range(len(output1)):
             loss += self.L1(output1[i], output2[i]) * self.w[i]
 
         return loss

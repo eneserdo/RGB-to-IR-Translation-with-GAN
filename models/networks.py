@@ -129,7 +129,11 @@ class Discriminator(nn.Module):
         for layer in layers:
             fm.append(layer(fm[-1]))
 
+        fm.pop(0)
+
         return fm
+
+
 
 class MultiScaleDisc(nn.Module):
     def __init__(self, input_nc=3, ndf=64, norm=nn.BatchNorm2d):
