@@ -1,5 +1,5 @@
 import torch.nn as nn
-import torch.utils.model_zoo as models
+import torch as t
 from collections import namedtuple
 
 
@@ -42,4 +42,63 @@ class Vgg16(nn.Module):
                 # print(self.net[i])
                 out.append(x)
         return out
+
+
+class GanLoss(nn.Module):
+    def __init__(self, use_lsgan, target_real_label=1.0):
+        super(GanLoss, self).__init__()
+
+        # One-sided smoothening
+        self.smooth = target_real_label
+
+        # Target tensors for first scale
+        self.target1_tensor_ones = None
+        self.target1_tensor_zeros = None
+
+        # Target tensors for second scale
+        self.target2_tensor_ones = None
+        self.target2_tensor_zeros = None
+
+        if use_lsgan:
+            self.criterion = nn.MSELoss()
+        else:
+            self.criterion = nn.BCEWithLogitsLoss()
+
+    def set_tensors(self, output1, output2):
+
+        self.target1_tensor_ones = t.ones_like(output1[-1]) * self.smooth
+        self.target1_tensor_zeros = t.zeros_like(output2[-1])
+
+        self.target2_tensor_ones = t.ones_like(output2[-1]) * self.smooth
+        self.target2_tensor_zeros = t.zeros_like(output2[-1])
+
+        print("Tensors Succesfully initializied")
+        return None
+
+    def calc_GAN(self, output1, output2, is_real=True):
+
+        loss = 0
+        if is_real:
+            loss = self.criterion(self.target1_tensor_ones, output1[-1]) + self.criterion(self.target2_tensor_ones,
+                                                                                          output2[-1])
+        else:
+            loss = self.criterion(self.target1_tensor_zeros, output1[-1]) + self.criterion(self.target2_tensor_zeros,
+                                                                                           output2[-1])
+
+        return loss
+
+
+class FeatureMatchingLoss():
+    def __init__(self):
+
+        # Feature Matching Loss
+        self.L1 = nn.L1Loss()
+        self.w = [1 / 32., 1 / 16., 1 / 8., 1 / 4., 1 / 2.]
+
+    def calc_FM(self, output1, output2):
+        loss = 0
+        for i in range(1, len(output1)):
+            loss += self.L1(output1[i], output2[i]) * self.w[i]
+
+        return loss
 
