@@ -19,6 +19,7 @@ def main(opt):
     epoch = 1000
     batch_size = 10
     nf = 1
+    n_blocks = 1
 
     ####### Preparation for Training #######
     # Load the networks
@@ -30,7 +31,7 @@ def main(opt):
     print(f"Device: {device}")
 
     disc = networks.MultiScaleDisc(input_nc=3, ndf=nf).to(device)
-    gen = networks.Generator(input_nc=3, output_nc=1, ngf=nf, n_blocks=7, transposed=opt.transposed).to(device)
+    gen = networks.Generator(input_nc=3, output_nc=1, ngf=nf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
 
     if opt.current_epoch != 0:
 
@@ -55,7 +56,7 @@ def main(opt):
     loss_p = losses.VGGLoss()
 
     # Create dataloader
-    ds = dataset.CustomDataset(opt.data_dir)
+    ds = dataset.CustomDataset(opt.data_dir, is_segment=opt.segment)
     dataloader = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=2)
 
     # Start to training
@@ -70,8 +71,9 @@ def main(opt):
             ir = data[1].to(device)
             if opt.segment:
                 segment = data[2].to(device)
-
-            condition = t.cat([rgb, segment], dim=1)
+                condition = t.cat([rgb, segment], dim=1)
+            else:
+                condition = rgb
 
             ir_pred = gen(condition)
 
@@ -83,11 +85,11 @@ def main(opt):
 
             gen_loss = loss(out1_pred[-1], out2_pred[-1], is_real=True) * lambda_D + (
                     loss_fm(out1_pred[:-1], out1[:-1]) + loss_fm(out2_pred[:-1], out2[:-1])) * lambda_FM + \
-                       +lambda_P * loss_p(ir_pred, ir)
+                       + lambda_P * loss_p(ir_pred, ir)
 
-            # loss_change_g
+            loss_change_g += [gen_loss.item()]
+
             gen_loss.backward()
-
             optim_g.step()
 
             # Updating Discriminator.
@@ -95,16 +97,16 @@ def main(opt):
 
             disc_loss = loss(out1_pred[-1].detach(), out2_pred[-1].detach(), is_real=False) + loss(out1[-1], out2[-1],
                                                                                                    is_real=True)
-            disc_loss.backward()
+            loss_change_d += [disc_loss.item()]
 
+            disc_loss.backward()
             optim_d.step()
 
-            if i%100==1:
+            if i % 100 == 1:
                 utils.show_tensor_images(ir_pred, i, opt.results_dir, 'pred')
                 utils.show_tensor_images(ir, i, opt.results_dir, 'ir')
                 utils.show_tensor_images(rgb, i, opt.results_dir, 'rgb')
                 print('Example images saved')
-
 
         t.save(disc.state_dict(), os.path.join(opt.checkpoints_dir, f"discriminator_{e}.pth"))
         t.save(gen.state_dict(), os.path.join(opt.checkpoints_dir, f"generator_{e}.pth"))
@@ -125,3 +127,7 @@ if __name__ == '__main__':
         print("Example directory was created")
 
     main(opt)
+
+    # TODO
+    # loss incelenecek
+    # grad update incele
