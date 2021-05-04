@@ -53,5 +53,5 @@ class CustomDataset(Dataset):
         ir = ir.transpose(2, 0, 1)
         ir = self.composed(ir)
 
-        return rgb, segment, ir
+        return [rgb, ir,segment]
 

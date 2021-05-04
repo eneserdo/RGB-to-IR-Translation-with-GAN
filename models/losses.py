@@ -81,7 +81,7 @@ class FeatureMatchingLoss():
         self.L1 = nn.L1Loss()
         self.w = [1 / 32., 1 / 16., 1 / 8., 1 / 4., 1 / 2.]
 
-    def calc_FM(self, output1, output2):
+    def __call__(self, output1, output2):
         loss = 0
         for i in range(len(output1)):
             loss += self.L1(output1[i], output2[i]) * self.w[i]

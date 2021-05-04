@@ -90,7 +90,7 @@ class ResnetBlock(nn.Module):
         return out
 
 
-
+####### Discriminator #######
 class Discriminator(nn.Module):
     def __init__(self, input_nc=3, ndf=64, norm=nn.BatchNorm2d):
         super(Discriminator, self).__init__()
@@ -139,10 +139,8 @@ class MultiScaleDisc(nn.Module):
     def __init__(self, input_nc=3, ndf=64, norm=nn.BatchNorm2d):
         super(MultiScaleDisc, self).__init__()
 
-        self.disc1=Discriminator()
-        self.disc2=Discriminator()
-        # TODO init params
-
+        self.disc1=Discriminator(input_nc, ndf, norm)
+        self.disc2=Discriminator(input_nc, ndf, norm)
 
     def forward(self, x):
         fm1=self.disc1(x)
@@ -151,7 +149,7 @@ class MultiScaleDisc(nn.Module):
         return fm1, fm2
 
 
-
+####### VGG for perceptual loss #######
 
 class Vgg19(t.nn.Module):
     def __init__(self, requires_grad=False):
