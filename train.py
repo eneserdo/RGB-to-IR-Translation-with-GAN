@@ -1,6 +1,6 @@
 import torch as t
 from torch.utils.data import DataLoader
-import tqdm
+from tqdm.auto import tqdm
 import torch.optim as optim
 from utils import parser, utils, dataset
 from models import networks, losses
@@ -17,7 +17,7 @@ def main(opt):
     lambda_P = 0.5
 
     epoch = 1000
-    batch_size = 10
+    batch_size = 1
     nf = 1
     n_blocks = 1
 

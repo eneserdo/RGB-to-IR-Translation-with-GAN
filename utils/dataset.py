@@ -42,18 +42,15 @@ class CustomDataset(Dataset):
         return self.L
 
     def __getitem__(self, index):
-
+        print("111")
         rgb = (io.imread(os.path.join(self.rgb_dir, f'{index}.jpg'))) / 255.0
-        rgb = rgb.transpose(2, 0, 1)
         rgb = self.composed(rgb)
 
         ir = (io.imread(os.path.join(self.ir_dir, f'{index}.jpg'))) / 255.0
-        ir = ir.transpose(2, 0, 1)
         ir = self.composed(ir)
 
         if self.is_segment:
             segment = (io.imread(os.path.join(self.segment_dir, f'{index}.jpg'))) / 255.0
-            segment = segment.transpose(2, 0, 1)
             segment = self.composed(segment)
             return [rgb, ir, segment]
 
