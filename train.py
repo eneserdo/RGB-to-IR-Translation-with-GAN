@@ -4,12 +4,21 @@ from tqdm.auto import tqdm
 import torch.optim as optim
 from utils import parser, utils, dataset
 from models import networks, losses
-import os
+import os, time
 import numpy as np
 
 
 def main(opt):
+
+    # Training config
     print(opt)
+
+    # Set the directories
+    checkpoints_dir=os.path.join(os.getcwd(),opt.checkpoints_dir)
+    results_dir=os.path.join(os.getcwd(),opt.results_dir)
+    data_dir=os.path.join(os.getcwd(),opt.data_dir)
+
+    # t.manual_seed(0)
 
     # Parameters
     lambda_D = 5.0
@@ -17,11 +26,10 @@ def main(opt):
     lambda_P = 0.5
 
     epoch = 1000
-    batch_size = 1
-    nf = 1
-    n_blocks = 1
+    batch_size = 2
+    nf = 10
+    n_blocks = 2
 
-    ####### Preparation for Training #######
     # Load the networks
     if t.cuda.is_available():
         device = "cuda"
@@ -30,18 +38,18 @@ def main(opt):
 
     print(f"Device: {device}")
 
-    disc = networks.MultiScaleDisc(input_nc=3, ndf=nf).to(device)
+    disc = networks.MultiScaleDisc(input_nc=1, ndf=nf).to(device)
     gen = networks.Generator(input_nc=3, output_nc=1, ngf=nf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
 
     if opt.current_epoch != 0:
 
-        disc.load_state_dict(t.load(os.path.join(opt.checkpoints_dir, f"discriminator_{opt.current_epoch}.pth")))
-        gen.load_state_dict(t.load(os.path.join(opt.checkpoints_dir, f"generator_{opt.current_epoch}.pth")))
+        disc.load_state_dict(t.load(os.path.join(checkpoints_dir, f"discriminator_{opt.current_epoch}.pth")))
+        gen.load_state_dict(t.load(os.path.join(checkpoints_dir, f"generator_{opt.current_epoch}.pth")))
 
     else:
 
-        utils.weights_init(disc)
-        utils.weights_init(gen)
+        disc.apply(utils.weights_init)
+        gen.apply(utils.weights_init)
 
     loss_change_g = []
     loss_change_d = []
@@ -56,61 +64,66 @@ def main(opt):
     loss_p = losses.VGGLoss()
 
     # Create dataloader
-    ds = dataset.CustomDataset(opt.data_dir, is_segment=opt.segment)
+    ds = dataset.CustomDataset(data_dir, is_segment=opt.segment)
     dataloader = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=2)
 
     # Start to training
     print("Training is starting...")
+    t.autograd.set_detect_anomaly(True)
     i = 0
     for e in range(epoch):
-        print(f"Epoch #{e}")
+        print(f"---- Epoch #{e} ----")
+        start = time.time()
+
         for data in tqdm(dataloader):
             i += 1
 
             rgb = data[0].to(device)
             ir = data[1].to(device)
+
             if opt.segment:
                 segment = data[2].to(device)
                 condition = t.cat([rgb, segment], dim=1)
             else:
                 condition = rgb
 
+            out1, out2 = disc(ir)
             ir_pred = gen(condition)
+
+            # Updating Discriminator
+            out1_pred, out2_pred = disc(ir_pred.detach())
+
+            optim_d.zero_grad()
+
+            disc_loss = (loss(out1_pred[-1], out2_pred[-1], is_real=False) + loss(out1[-1], out2[-1], is_real=True)) * lambda_D
+            loss_change_d += [disc_loss.item()/batch_size]
+
+            disc_loss.backward()
+            optim_d.step()
 
             # Updating Generator
             optim_g.zero_grad()
 
             out1_pred, out2_pred = disc(ir_pred)
-            out1, out2 = disc(ir)
 
-            gen_loss = loss(out1_pred[-1], out2_pred[-1], is_real=True) * lambda_D + (
-                    loss_fm(out1_pred[:-1], out1[:-1]) + loss_fm(out2_pred[:-1], out2[:-1])) * lambda_FM + \
-                       + lambda_P * loss_p(ir_pred, ir)
+            gen_loss = loss(out1_pred[-1], out2_pred[-1], is_real=True) * lambda_D + \
+                       (loss_fm(out1_pred[:-1], out1[:-1]) + loss_fm(out2_pred[:-1], out2[:-1])) * lambda_FM + \
+                       loss_p(ir_pred, ir) * lambda_P
 
-            loss_change_g += [gen_loss.item()]
+            loss_change_g += [gen_loss.item()/batch_size]
 
             gen_loss.backward()
             optim_g.step()
 
-            # Updating Discriminator.
-            optim_d.zero_grad()
-
-            disc_loss = loss(out1_pred[-1].detach(), out2_pred[-1].detach(), is_real=False) + loss(out1[-1], out2[-1],
-                                                                                                   is_real=True)
-            loss_change_d += [disc_loss.item()]
-
-            disc_loss.backward()
-            optim_d.step()
-
-            if i % 100 == 1:
-                utils.show_tensor_images(ir_pred, i, opt.results_dir, 'pred')
-                utils.show_tensor_images(ir, i, opt.results_dir, 'ir')
-                utils.show_tensor_images(rgb, i, opt.results_dir, 'rgb')
+            if i % opt.save_freq == 1:
+                utils.show_tensor_images(ir_pred, i, results_dir, 'pred')
+                utils.show_tensor_images(ir, i, results_dir, 'ir')
+                utils.show_tensor_images(rgb, i, results_dir, 'rgb')
                 print('Example images saved')
 
-        t.save(disc.state_dict(), os.path.join(opt.checkpoints_dir, f"discriminator_{e}.pth"))
-        t.save(gen.state_dict(), os.path.join(opt.checkpoints_dir, f"generator_{e}.pth"))
-        print("Models saved")
+        print(f"Epoch duration: {int((time.time()-start)//60):5d}m {(time.time()-start)%60:.1f}s")
+
+        utils.save_model(disc, gen, e, checkpoints_dir)
 
 
 if __name__ == '__main__':
@@ -118,13 +131,18 @@ if __name__ == '__main__':
     args = parser.Parser()
     opt = args.initialize()
 
-    if not os.path.isdir(opt.checkpoints_dir):
-        os.mkdir(opt.checkpoints_dir)
+    print(f"Working directory: {os.getcwd()}")
+
+    if not os.path.isdir(os.path.join(os.getcwd(),opt.checkpoints_dir)):
+        os.mkdir(os.path.join(os.getcwd(),opt.checkpoints_dir))
         print("Checkpoints directory was created")
 
-    if not os.path.isdir(opt.results_dir):
-        os.mkdir(opt.results_dir)
+    if not os.path.isdir(os.path.join(os.getcwd(),opt.results_dir)):
+        os.mkdir(os.path.join(os.getcwd(),opt.results_dir))
         print("Example directory was created")
+
+    if opt.amp:
+        raise Warning("AMP is not implemented yet")
 
     main(opt)
 

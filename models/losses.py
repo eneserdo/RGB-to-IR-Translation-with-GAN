@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch as t
 from .networks import Vgg19
 
+
 # Perceptual Loss
 
 class VGGLoss(nn.Module):
@@ -12,6 +13,10 @@ class VGGLoss(nn.Module):
         self.weights = [1.0 / 32, 1.0 / 16, 1.0 / 8, 1.0 / 4, 1.0]
 
     def forward(self, x, y):
+
+        x = t.cat([x, x, x], dim=1)
+        y = t.cat([y, y, y], dim=1)
+
         x_vgg, y_vgg = self.vgg(x), self.vgg(y)
         loss = 0
         for i in range(len(x_vgg)):
@@ -36,7 +41,7 @@ class GanLoss(nn.Module):
         self.target2_tensor_ones = None
         self.target2_tensor_zeros = None
 
-        self.setted=False
+        self.setted = False
 
         if use_lsgan:
             self.criterion = nn.MSELoss()
@@ -46,37 +51,37 @@ class GanLoss(nn.Module):
     def _set_tensors(self, output1, output2):
 
         self.target1_tensor_ones = t.ones_like(output1) * self.smooth
-        self.target1_tensor_zeros = t.zeros_like(output2)
+        self.target1_tensor_zeros = t.zeros_like(output1)
 
         self.target2_tensor_ones = t.ones_like(output2) * self.smooth
         self.target2_tensor_zeros = t.zeros_like(output2)
 
         print("Tensors Succesfully initializied")
 
-        self.setted=True
+        self.setted = True
 
-        return None
+
 
     def forward(self, output1, output2, is_real=True):
 
         if not self.setted:
             self._set_tensors(output1, output2)
 
-        loss = 0
+
         if is_real:
             loss = self.criterion(self.target1_tensor_ones, output1) + self.criterion(self.target2_tensor_ones,
-                                                                                          output2)
+                                                                                      output2)
         else:
             loss = self.criterion(self.target1_tensor_zeros, output1) + self.criterion(self.target2_tensor_zeros,
-                                                                                           output2)
+                                                                                       output2)
 
         return loss
+
 
 # Feature Matching Loss
 
 class FeatureMatchingLoss():
     def __init__(self):
-
         # Feature Matching Loss
         self.L1 = nn.L1Loss()
         self.w = [1 / 32., 1 / 16., 1 / 8., 1 / 4., 1 / 2.]
@@ -84,7 +89,6 @@ class FeatureMatchingLoss():
     def __call__(self, output1, output2):
         loss = 0
         for i in range(len(output1)):
-            loss += self.L1(output1[i], output2[i]) * self.w[i]
+            loss += self.L1(output1[i], output2[i].detach()) * self.w[i]
 
         return loss
-

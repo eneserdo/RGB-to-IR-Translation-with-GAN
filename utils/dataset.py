@@ -14,8 +14,8 @@ class CustomDataset(Dataset):
 
         self.is_segment=is_segment
 
-        self.composed = transforms.Compose([transforms.ToTensor(),
-                                            transforms.Normalize((0.34, 0.33, 0.35), (0.19, 0.18, 0.18))])
+        self.composed_rgb = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.34, 0.33, 0.35), (0.19, 0.18, 0.18))])
+        self.composed_ir = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.35), (0.18))])
 
         self.rgb_dir = os.path.join(root_dir, 'rgb')
         self.ir_dir = os.path.join(root_dir, 'ir')
@@ -42,16 +42,15 @@ class CustomDataset(Dataset):
         return self.L
 
     def __getitem__(self, index):
-        print("111")
         rgb = (io.imread(os.path.join(self.rgb_dir, f'{index}.jpg'))) / 255.0
-        rgb = self.composed(rgb)
+        rgb = self.composed_rgb(rgb)
 
         ir = (io.imread(os.path.join(self.ir_dir, f'{index}.jpg'))) / 255.0
-        ir = self.composed(ir)
+        ir = self.composed_ir(ir[:,:,0])
 
         if self.is_segment:
             segment = (io.imread(os.path.join(self.segment_dir, f'{index}.jpg'))) / 255.0
-            segment = self.composed(segment)
-            return [rgb, ir, segment]
 
-        return [rgb, ir]
+            return [rgb.float(), ir.float(), segment.float()]
+
+        return [rgb.float(), ir.float()]
