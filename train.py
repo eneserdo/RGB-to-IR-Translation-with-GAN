@@ -71,7 +71,7 @@ def main(opt):
     print("Training is starting...")
     t.autograd.set_detect_anomaly(True)
     i = 0
-    for e in range(epoch):
+    for e in range(opt.current_epoch, epoch+opt.current_epoch):
         print(f"---- Epoch #{e} ----")
         start = time.time()
 
@@ -122,9 +122,12 @@ def main(opt):
                 print('Example images saved')
 
         print(f"Epoch duration: {int((time.time()-start)//60):5d}m {(time.time()-start)%60:.1f}s")
-
+        # TODO print epoch loss
+        print("Losses:")
+        print(f"FM: {fm}; Perceptual: {percept}; G: {}; D1: {}; D2: {};")
         utils.save_model(disc, gen, e, checkpoints_dir)
 
+    # TODO save the final loss arrays
 
 if __name__ == '__main__':
 

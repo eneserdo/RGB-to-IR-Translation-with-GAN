@@ -34,3 +34,16 @@ class TestParser:
 
         return self.arg.parse_args()
 
+
+class ResizeParser:
+    def __init__(self):
+        self.arg=argparse.ArgumentParser()
+
+    def initialize(self):
+
+        self.arg.add_argument('--out_dir', type=str, default='dataset', help='Results are saved here')
+        self.arg.add_argument('--rgb_dir', type=str, required=True, help='Input images')
+        self.arg.add_argument('--ir_dir', type=str, required=True, help='Input images')
+
+        return self.arg.parse_args()
+
