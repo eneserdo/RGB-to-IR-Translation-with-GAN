@@ -1,3 +1,9 @@
+"""
+    This file saves the model after every epoch. For further training of n epochs trained model,
+     specify the '-e', '--current_epoch' parameters.
+    If you want to use different data, do not forget to modify the utils.dataset
+"""
+
 import torch as t
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
@@ -13,10 +19,10 @@ def main(opt):
     # Training config
     print(opt)
 
-    # Set the directories
-    checkpoints_dir=os.path.join(os.getcwd(),opt.checkpoints_dir)
-    results_dir=os.path.join(os.getcwd(),opt.results_dir)
-    data_dir=os.path.join(os.getcwd(),opt.data_dir)
+    # # Set the directories
+    # checkpoints_dir=opt.checkpoints_dir
+    # results_dir=opt.results_dir
+    # data_dir=opt.data_dir
 
     # t.manual_seed(0)
 
@@ -25,8 +31,8 @@ def main(opt):
     lambda_FM = 1
     lambda_P = 0.5
 
-    epoch = 1000
-    batch_size = 2
+    epoch = 10
+    batch_size = 1
     nf = 10
     n_blocks = 2
 
@@ -38,18 +44,20 @@ def main(opt):
 
     print(f"Device: {device}")
 
+    # TODO: if segment exists modify input_nc
     disc = networks.MultiScaleDisc(input_nc=1, ndf=nf).to(device)
     gen = networks.Generator(input_nc=3, output_nc=1, ngf=nf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
 
     if opt.current_epoch != 0:
 
-        disc.load_state_dict(t.load(os.path.join(checkpoints_dir, f"discriminator_{opt.current_epoch}.pth")))
-        gen.load_state_dict(t.load(os.path.join(checkpoints_dir, f"generator_{opt.current_epoch}.pth")))
+        disc.load_state_dict(t.load(os.path.join(opt.checkpoints_dir, f"discriminator_{opt.current_epoch}.pth")))
+        gen.load_state_dict(t.load(os.path.join(opt.checkpoints_dir, f"generator_{opt.current_epoch}.pth")))
 
     else:
 
         disc.apply(utils.weights_init)
         gen.apply(utils.weights_init)
+
 
     loss_change_g = []
     loss_change_d = []
@@ -64,7 +72,7 @@ def main(opt):
     loss_p = losses.VGGLoss()
 
     # Create dataloader
-    ds = dataset.CustomDataset(data_dir, is_segment=opt.segment)
+    ds = dataset.CustomDataset(opt.data_dir, is_segment=opt.segment)
     dataloader = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=2)
 
     # Start to training
@@ -106,42 +114,54 @@ def main(opt):
 
             out1_pred, out2_pred = disc(ir_pred)
 
+            fm=loss_fm(out1_pred[:-1], out1[:-1]) + loss_fm(out2_pred[:-1], out2[:-1])
+            perceptual=loss_p(ir_pred, ir)
+
             gen_loss = loss(out1_pred[-1], out2_pred[-1], is_real=True) * lambda_D + \
-                       (loss_fm(out1_pred[:-1], out1[:-1]) + loss_fm(out2_pred[:-1], out2[:-1])) * lambda_FM + \
-                       loss_p(ir_pred, ir) * lambda_P
+                       fm * lambda_FM + perceptual * lambda_P
 
             loss_change_g += [gen_loss.item()/batch_size]
 
             gen_loss.backward()
             optim_g.step()
 
-            if i % opt.save_freq == 1:
-                utils.show_tensor_images(ir_pred, i, results_dir, 'pred')
-                utils.show_tensor_images(ir, i, results_dir, 'ir')
-                utils.show_tensor_images(rgb, i, results_dir, 'rgb')
+            # Save images
+            if i % opt.img_save_freq == 1:
+                utils.save_tensor_images(ir_pred, i, opt.results_file, 'pred')
+                utils.save_tensor_images(ir, i, opt.results_file, 'ir')
+                utils.save_tensor_images(rgb, i, opt.results_file, 'rgb')
                 print('Example images saved')
 
-        print(f"Epoch duration: {int((time.time()-start)//60):5d}m {(time.time()-start)%60:.1f}s")
-        # TODO print epoch loss
-        print("Losses:")
-        print(f"FM: {fm}; Perceptual: {percept}; G: {}; D1: {}; D2: {};")
-        utils.save_model(disc, gen, e, checkpoints_dir)
+                print("Losses:")
+                print(f"FM: {fm.item()/batch_size:.2f}; P: {perceptual.item()/batch_size:.2f}; G: {loss_change_g[-1]:.2f}; D: {loss_change_d[-1]:.2f}")
 
-    # TODO save the final loss arrays
+        print(f"Epoch duration: {int((time.time()-start)//60):5d}m {(time.time()-start)%60:.1f}s")
+
+        if i % opt.model_save_freq == 0:
+            utils.save_model(disc, gen, e, opt.checkpoints_file)
+
+    np.save(os.path.join(opt.checkpoints_file, f'd_loss_v{e}.npy'), np.array(loss_change_d))
+    np.save(os.path.join(opt.checkpoints_file, f'g_loss_v{e}.npy'), np.array(loss_change_g))
+
+    utils.save_model(disc, gen, e, opt.checkpoints_file)
+
+    utils.show_loss(opt.checkpoints_file)
+    print("Done!")
+
 
 if __name__ == '__main__':
 
-    args = parser.Parser()
-    opt = args.initialize()
+    args = parser.Parser(__doc__)
+    opt = args()
 
     print(f"Working directory: {os.getcwd()}")
 
-    if not os.path.isdir(os.path.join(os.getcwd(),opt.checkpoints_dir)):
-        os.mkdir(os.path.join(os.getcwd(),opt.checkpoints_dir))
+    if not os.path.isdir(opt.checkpoints_file):
+        os.mkdir(opt.checkpoints_file)
         print("Checkpoints directory was created")
 
-    if not os.path.isdir(os.path.join(os.getcwd(),opt.results_dir)):
-        os.mkdir(os.path.join(os.getcwd(),opt.results_dir))
+    if not os.path.isdir(opt.results_file):
+        os.mkdir(opt.results_file)
         print("Example directory was created")
 
     if opt.amp:
@@ -149,6 +169,3 @@ if __name__ == '__main__':
 
     main(opt)
 
-    # TODO
-    # loss incelenecek
-    # grad update incele

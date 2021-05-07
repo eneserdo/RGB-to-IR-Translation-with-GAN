@@ -1,21 +1,27 @@
-import argparse
+"""
+    sThis is the description, it will be accessible within the variable
+    __doc__
+"""
 
+import argparse
+import dataset
 
 class Parser:
-    def __init__(self):
-        self.arg=argparse.ArgumentParser()
+    def __init__(self,des):
+        self.arg=argparse.ArgumentParser(description=des)
 
-    def initialize(self):
+    def __call__(self):
 
-        self.arg.add_argument('--current_epoch',default=0, help="Enter the epoch numper to continue the training")
+        self.arg.add_argument('-e', '--current_epoch',default=0, help="Enter the epoch numper to continue the training")
         self.arg.add_argument('--transposed',default=False, help="Use transposed convolution")
         self.arg.add_argument('--segment',default=False, help="Use segmentation images")
         self.arg.add_argument('--loss',default='lsgan', help="Enter the loss type: lsgan or gan")
-        self.arg.add_argument('--checkpoints_dir', type=str, default='checkpoints', help='models are saved here')
-        self.arg.add_argument('--results_dir', type=str, default='examples', help='Results are saved here')
+        self.arg.add_argument('--checkpoints_file', type=str, default='checkpoints', help='Models are saved here')
+        self.arg.add_argument('--results_file', type=str, default='examples', help='Results are saved here')
         self.arg.add_argument('--data_dir', type=str, default='dataset', help='Enter the dataset directory')
         self.arg.add_argument('--amp', type=bool, default=False, help='To use automatic mixed precision')
-        self.arg.add_argument('--save_freq', type=int, default=500, help='Image saving frequency')
+        self.arg.add_argument('-isf', '--img_save_freq', type=int, default=500, help='Image saving frequency')
+        self.arg.add_argument('-msf' '--model_save_freq', type=int, default=10, help='Model saving frequency')
 
         return self.arg.parse_args()
 
@@ -24,9 +30,9 @@ class TestParser:
     def __init__(self):
         self.arg=argparse.ArgumentParser()
 
-    def initialize(self):
+    def __call__(self):
 
-        self.arg.add_argument('--current_epoch', required=True, help="Enter the epoch numper of the models")
+        self.arg.add_argument('-e', '--current_epoch', required=True, help="Enter the epoch numper of the models")
         self.arg.add_argument('--segment',default=False, help="Use segmentation images")
         self.arg.add_argument('--checkpoints_dir', type=str, default='checkpoints', help='models directory to load')
         self.arg.add_argument('--out_dir', type=str, default='test_results', help='Results are saved here')
@@ -36,10 +42,10 @@ class TestParser:
 
 
 class ResizeParser:
-    def __init__(self):
-        self.arg=argparse.ArgumentParser()
+    def __init__(self, des):
+        self.arg=argparse.ArgumentParser(description=des)
 
-    def initialize(self):
+    def __call__(self):
 
         self.arg.add_argument('--out_dir', type=str, default='dataset', help='Results are saved here')
         self.arg.add_argument('--rgb_dir', type=str, required=True, help='Input images')

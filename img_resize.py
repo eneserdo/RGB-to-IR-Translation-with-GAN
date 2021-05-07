@@ -1,3 +1,7 @@
+"""
+    This is specifically designed to resize the FLIR thermal image dataset.
+"""
+
 import cv2
 import glob, os
 import tqdm
@@ -5,9 +9,11 @@ from collections import Counter
 from tqdm.auto import tqdm
 from utils import parser
 
-def main():
-    rgb_dir = r"C:\Users\Enes\Desktop\datasets\flir data\FLIR_ADAS_1_3\train\RGB"
-    ir_dir = r"C:\Users\Enes\Desktop\datasets\flir data\FLIR_ADAS_1_3\train\thermal_8_bit"
+
+def main(opt):
+
+    rgb_dir = opt.rgb_dir
+    ir_dir = opt.ir_dir
     root_dir = r"C:\Users\Enes\Desktop\datasets\flir_processed"
 
     dst_rgb1 = os.path.join(root_dir, "rgb1")
@@ -63,7 +69,7 @@ def main():
             # case 3
             if im.shape[1] == 1280 and im.shape[0] == 1024:
 
-                k += 1
+
                 # RGB
                 im = cv2.resize(im, (640, 512))
                 cv2.imwrite(dst_rgb3 + f"/FLIR_{k:0>5d}.jpg", im)
@@ -74,10 +80,11 @@ def main():
                 ir = cv2.resize(ir, (640, 512))
                 cv2.imwrite(dst_ir3 + f"/FLIR_{k:0>5d}.jpg", ir)
 
+                k += 1
+
             # case 2
             elif im.shape[1] == 2048 and im.shape[0] == 1536:
 
-                k += 1
                 # RGB
                 im = im[:, 64:2048 - 64]
                 im = cv2.resize(im, (640, 512))
@@ -89,9 +96,10 @@ def main():
                 ir = cv2.resize(ir, (640, 512))
                 cv2.imwrite(dst_ir2 + f"/FLIR_{k:0>5d}.jpg", ir)
 
+                k += 1
+
             elif im.shape[1] == 1800 and im.shape[0] == 1600:
 
-                k += 1
                 # RGB
                 im = im[margin_top1:1600 - margin_bottom1, margin_left1:1800 - margin_right1]
                 im = cv2.resize(im, (640, 512))
@@ -99,6 +107,8 @@ def main():
                 # IR
                 ir = cv2.imread(ir_dir + f"/FLIR_{i:0>5d}.jpeg")
                 cv2.imwrite(dst_ir1 + f"/FLIR_{k:0>5d}.jpg", ir)
+
+                k += 1
 
             else:
                 others += 1
@@ -146,17 +156,16 @@ def main():
 
 if __name__ == '__main__':
 
-    args = parser.ResizeParser()
-    opt = args.initialize()
+    args = parser.ResizeParser(__doc__)
+    opt = args()
 
     print(f"Working directory: {os.getcwd()}")
 
-    if not os.path.isdir(os.path.join(os.getcwd(),opt.checkpoints_dir)):
-        os.mkdir(os.path.join(os.getcwd(),opt.checkpoints_dir))
-        print("Checkpoints directory was created")
+    if not os.path.isdir(opt.rgb_dir) or not os.path.isdir(opt.ir_dir):
+        raise FileNotFoundError
 
     if not os.path.isdir(os.path.join(os.getcwd(),opt.results_dir)):
         os.mkdir(os.path.join(os.getcwd(),opt.results_dir))
         print("Example directory was created")
 
-    main()
+    main(opt)

@@ -21,8 +21,11 @@ class CustomDataset(Dataset):
         self.ir_dir = os.path.join(root_dir, 'ir')
 
         # Check dir exist
-        assert os.path.isdir(self.rgb_dir), 'Error: No rgb dir'
-        assert os.path.isdir(self.ir_dir), 'Error: No ir dir'
+        if not os.path.isdir(self.rgb_dir):
+            raise FileNotFoundError('Error: No rgb directory')
+
+        if not os.path.isdir(self.ir_dir):
+            raise FileNotFoundError('Error: No ir directory')
 
         _, _, files1 = next(os.walk(self.rgb_dir))
         _, _, files2 = next(os.walk(self.ir_dir))
@@ -31,7 +34,7 @@ class CustomDataset(Dataset):
 
         if self.is_segment:
             self.segment_dir = os.path.join(root_dir, 'segment')
-            assert os.path.isdir(self.segment_dir), 'Error: No segment dir'
+            assert os.path.isdir(self.segment_dir), 'Error: No segment directory'
             _, _, files3 = next(os.walk(self.segment_dir))
             assert len(files3) == len(files2), f"files are different rgb:{len(files1)}, segment:{len(files3)}"
 
@@ -56,3 +59,43 @@ class CustomDataset(Dataset):
             return [rgb.float(), ir.float(), segment.float()]
 
         return [rgb.float(), ir.float()]
+
+
+class TestDataset(Dataset):
+
+    def __init__(self, root_dir, is_segment=False):
+
+        self.is_segment=is_segment
+
+        self.composed_rgb = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.34, 0.33, 0.35), (0.19, 0.18, 0.18))])
+
+        self.rgb_dir = os.path.join(root_dir, 'rgb')
+
+        # Check dir exist
+        assert os.path.isdir(self.rgb_dir), 'Error: No rgb dir'
+
+        _, _, files1 = next(os.walk(self.rgb_dir))
+
+        if self.is_segment:
+            self.segment_dir = os.path.join(root_dir, 'segment')
+            assert os.path.isdir(self.segment_dir), 'Error: No segment dir'
+            _, _, files3 = next(os.walk(self.segment_dir))
+            assert len(files3) == len(files1), f"files are different rgb:{len(files1)}, segment:{len(files3)}"
+
+        self.L = len(files1)
+        print(f"{self.L} images found")
+
+    def __len__(self):
+        return self.L
+
+    def __getitem__(self, index):
+        rgb = (io.imread(os.path.join(self.rgb_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
+        # rgb = (io.imread(os.path.join(self.rgb_dir, f'{index}.jpg'))) / 255.0
+        rgb = self.composed_rgb(rgb)
+
+        if self.is_segment:
+            segment = (io.imread(os.path.join(self.segment_dir, f'{index}.jpg'))) / 255.0
+
+            return [rgb.float(), segment.float()]
+
+        return rgb.float()

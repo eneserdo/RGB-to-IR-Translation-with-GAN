@@ -3,12 +3,6 @@ import torch.nn as nn
 from torchvision import models
 
 
-    # if len(gpu_ids) > 0:
-    #     assert (torch.cuda.is_available())
-    #     netG.cuda(gpu_ids[0])
-    # netG.apply(weights_init)
-
-
 ####### Generator #######
 
 class Generator(nn.Module):
@@ -95,6 +89,8 @@ class Discriminator(nn.Module):
     def __init__(self, input_nc=3, ndf=64, norm=nn.BatchNorm2d):
         super(Discriminator, self).__init__()
 
+        print("norm param is neglected")
+
         self.d1 = self._conv_block(input_nc, ndf, k=3, norm=norm)
 
         self.d2 = self._conv_block(ndf, ndf, k=3, norm=norm, pool=True)
@@ -131,12 +127,13 @@ class Discriminator(nn.Module):
 
         fm.pop(0)
 
-        return fm
-
+        # return fm
+        return fm[2:]
+        # FIXME
 
 
 class MultiScaleDisc(nn.Module):
-    def __init__(self, input_nc=3, ndf=64, norm=nn.BatchNorm2d):
+    def __init__(self, input_nc=2, ndf=64, norm=nn.BatchNorm2d):
         super(MultiScaleDisc, self).__init__()
 
         self.disc1=Discriminator(input_nc, ndf, norm)

@@ -7,14 +7,9 @@ from models import networks, losses
 import os
 import numpy as np
 
-def main(opt):
-    """ TODO
-    Only generator will be runned
-    If there is a input image just translate that
-    If there is a input folder translate these images to new folder
-    """
 
-    ####### Preparation for Testing #######
+def main(opt):
+
     # Load the networks
     if t.cuda.is_available():
         device = "cuda"
@@ -30,21 +25,33 @@ def main(opt):
 
     gen.eval()
 
-    dataloader=None
+    try:
+        dataloader = dataset.CustomDataset()
+    except:
+        print("IR images not found but it is ok")
+        dataloader = dataset.TestDataset()
 
-    for img in dataloader:
+    i = 0
 
+    for data in dataloader:
+        i += 1
         with t.no_grad():
 
-            pred=gen()
+            rgb = data[0].to(device)
 
-        # TODO save images
+            if opt.segment:
+                segment = data[-1].to(device)
+                condition = t.cat([rgb, segment], dim=1)
+            else:
+                condition = rgb
+
+            ir_pred = gen(condition)
+            utils.save_tensor_images(ir_pred, i, opt.out_dir, 'pred')
 
 
 if __name__ == '__main__':
 
-    raise NotImplemented
+    args = parser.TestParser()
+    opt = args()
+    main(opt)
 
-    # args = parser.TestParser()
-    # opt = args.initialize()
-    # main(opt)
