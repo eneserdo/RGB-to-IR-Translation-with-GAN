@@ -1,13 +1,11 @@
-"""
-    sThis is the description, it will be accessible within the variable
-    __doc__
-"""
-
 import argparse
 import dataset
 
+# Todo: Add option to disable fm loss
+
+
 class Parser:
-    def __init__(self,des):
+    def __init__(self, des):
         self.arg=argparse.ArgumentParser(description=des)
 
     def __call__(self):

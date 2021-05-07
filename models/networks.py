@@ -125,8 +125,7 @@ class Discriminator(nn.Module):
         for layer in layers:
             fm.append(layer(fm[-1]))
 
-        fm.pop(0)
-
+        # fm.pop(0)
         # return fm
         return fm[2:]
         # FIXME
@@ -141,7 +140,7 @@ class MultiScaleDisc(nn.Module):
 
     def forward(self, x):
         fm1=self.disc1(x)
-        fm2=self.disc2(nn.functional.interpolate(x,scale_factor=0.5))
+        fm2=self.disc2(nn.functional.interpolate(x, scale_factor=0.5))
 
         return fm1, fm2
 

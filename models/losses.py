@@ -60,13 +60,10 @@ class GanLoss(nn.Module):
 
         self.setted = True
 
-
-
     def forward(self, output1, output2, is_real=True):
 
         if not self.setted:
             self._set_tensors(output1, output2)
-
 
         if is_real:
             loss = self.criterion(self.target1_tensor_ones, output1) + self.criterion(self.target2_tensor_ones,
@@ -84,7 +81,7 @@ class FeatureMatchingLoss():
     def __init__(self):
         # Feature Matching Loss
         self.L1 = nn.L1Loss()
-        self.w = [1 / 32., 1 / 16., 1 / 8., 1 / 4., 1 / 2.]
+        self.w = [1./8, 1./4, 1./2, 1.]
 
     def __call__(self, output1, output2):
         loss = 0

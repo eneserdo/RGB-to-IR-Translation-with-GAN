@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time, os, cv2
 from skimage import io
-
+import glob
 
 def weights_init(m):
     classname = m.__class__.__name__
@@ -52,4 +52,27 @@ def save_model(gen, disc, e, save_dir):
 
 
 def show_loss(src_dir):
-    pass
+    files_d=glob.glob(os.path.join(src_dir, 'd_loss_v*.npy'))
+    sorted_disc_loss=sorted(files_d)
+
+    files_g=glob.glob(os.path.join(src_dir, 'g_loss_v*.npy'))
+    sorted_gen_loss=sorted(files_g)
+
+    print('Reading all saved losses...')
+    # print(sorted_disc_loss)
+    arr_g=np.array([])
+    arr_d=np.array([])
+
+    for l in range(len(sorted_gen_loss)):
+
+        arr_g=np.concatenate([arr_g, np.load(sorted_gen_loss[l])])
+
+        arr_d=np.concatenate([arr_d, np.load(sorted_disc_loss[l])])
+
+
+    plt.plot(np.arange(arr_d.shape[0]), arr_d, color='orange', label='Discriminator')
+    plt.plot(np.arange(arr_g.shape[0]), arr_g, color='blue', label='Generator')
+    plt.ylabel("Loss")
+    plt.xlabel("Iteration")
+    plt.legend()
+    plt.show()

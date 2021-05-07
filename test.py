@@ -18,7 +18,7 @@ def main(opt):
 
     print(f"Device: {device}")
 
-    gen = networks.Generator(input_nc=3, output_nc=1, ngf=nf, n_blocks=7, transposed=opt.transposed).to(device)
+    gen = networks.Generator(input_nc=3, output_nc=1, ngf=64, n_blocks=7, transposed=opt.transposed).to(device)
 
     if opt.current_epoch != 0:
         gen.load_state_dict(t.load(os.path.join(opt.checkpoints_dir, f"generator_{opt.current_epoch}.pth")))

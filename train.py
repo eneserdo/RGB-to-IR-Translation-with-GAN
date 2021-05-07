@@ -15,7 +15,6 @@ import numpy as np
 
 
 def main(opt):
-
     # Training config
     print(opt)
 
@@ -32,9 +31,9 @@ def main(opt):
     lambda_P = 0.5
 
     epoch = 10
-    batch_size = 1
-    nf = 10
-    n_blocks = 2
+    batch_size = 5
+    nf = 64
+    n_blocks = 7
 
     # Load the networks
     if t.cuda.is_available():
@@ -49,15 +48,12 @@ def main(opt):
     gen = networks.Generator(input_nc=3, output_nc=1, ngf=nf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
 
     if opt.current_epoch != 0:
-
-        disc.load_state_dict(t.load(os.path.join(opt.checkpoints_dir, f"discriminator_{opt.current_epoch}.pth")))
-        gen.load_state_dict(t.load(os.path.join(opt.checkpoints_dir, f"generator_{opt.current_epoch}.pth")))
+        disc.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"discriminator_{opt.current_epoch}.pth")))
+        gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"generator_{opt.current_epoch}.pth")))
 
     else:
-
         disc.apply(utils.weights_init)
         gen.apply(utils.weights_init)
-
 
     loss_change_g = []
     loss_change_d = []
@@ -69,17 +65,18 @@ def main(opt):
     # Create loss functions
     loss = losses.GanLoss()
     loss_fm = losses.FeatureMatchingLoss()
-    loss_p = losses.VGGLoss()
+    loss_p = losses.VGGLoss()  # perceptual loss
 
     # Create dataloader
     ds = dataset.CustomDataset(opt.data_dir, is_segment=opt.segment)
     dataloader = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=2)
 
+    # t.autograd.set_detect_anomaly(True)
+
     # Start to training
     print("Training is starting...")
-    t.autograd.set_detect_anomaly(True)
     i = 0
-    for e in range(opt.current_epoch, epoch+opt.current_epoch):
+    for e in range(1+opt.current_epoch, 1 + epoch + opt.current_epoch):
         print(f"---- Epoch #{e} ----")
         start = time.time()
 
@@ -99,12 +96,13 @@ def main(opt):
             ir_pred = gen(condition)
 
             # Updating Discriminator
-            out1_pred, out2_pred = disc(ir_pred.detach())
-
             optim_d.zero_grad()
 
-            disc_loss = (loss(out1_pred[-1], out2_pred[-1], is_real=False) + loss(out1[-1], out2[-1], is_real=True)) * lambda_D
-            loss_change_d += [disc_loss.item()/batch_size]
+            out1_pred, out2_pred = disc(ir_pred.detach())
+
+            disc_loss = (loss(out1_pred[-1], out2_pred[-1], is_real=False) + loss(out1[-1], out2[-1],
+                                                                                  is_real=True)) * lambda_D
+            loss_change_d += [disc_loss.item() / batch_size]
 
             disc_loss.backward()
             optim_d.step()
@@ -114,13 +112,13 @@ def main(opt):
 
             out1_pred, out2_pred = disc(ir_pred)
 
-            fm=loss_fm(out1_pred[:-1], out1[:-1]) + loss_fm(out2_pred[:-1], out2[:-1])
-            perceptual=loss_p(ir_pred, ir)
+            fm = loss_fm(out1_pred[:-1], out1[:-1]) + loss_fm(out2_pred[:-1], out2[:-1])
+            perceptual = loss_p(ir_pred, ir)
 
             gen_loss = loss(out1_pred[-1], out2_pred[-1], is_real=True) * lambda_D + \
                        fm * lambda_FM + perceptual * lambda_P
 
-            loss_change_g += [gen_loss.item()/batch_size]
+            loss_change_g += [gen_loss.item() / batch_size]
 
             gen_loss.backward()
             optim_g.step()
@@ -133,9 +131,10 @@ def main(opt):
                 print('Example images saved')
 
                 print("Losses:")
-                print(f"FM: {fm.item()/batch_size:.2f}; P: {perceptual.item()/batch_size:.2f}; G: {loss_change_g[-1]:.2f}; D: {loss_change_d[-1]:.2f}")
+                print(
+                    f"FM: {fm.item() / batch_size:.2f}; P: {perceptual.item() / batch_size:.2f}; G: {loss_change_g[-1]:.2f}; D: {loss_change_d[-1]:.2f}")
 
-        print(f"Epoch duration: {int((time.time()-start)//60):5d}m {(time.time()-start)%60:.1f}s")
+        print(f"Epoch duration: {int((time.time() - start) // 60):5d}m {(time.time() - start) % 60:.1f}s")
 
         if i % opt.model_save_freq == 0:
             utils.save_model(disc, gen, e, opt.checkpoints_file)
@@ -168,4 +167,3 @@ if __name__ == '__main__':
         raise Warning("AMP is not implemented yet")
 
     main(opt)
-
