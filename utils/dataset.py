@@ -1,6 +1,6 @@
 import torch as t
 from skimage import io
-import os
+import os, cv2
 from torchvision import transforms
 from torch.utils.data import Dataset
 
@@ -10,12 +10,9 @@ from torch.utils.data import Dataset
 
 class CustomDataset(Dataset):
 
-    def __init__(self, root_dir, is_segment=False):
+    def __init__(self, root_dir, is_segment=False, sf=1):
 
         self.is_segment=is_segment
-
-        self.composed_rgb = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.34, 0.33, 0.35), (0.19, 0.18, 0.18))])
-        self.composed_ir = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.35), (0.18))])
 
         self.rgb_dir = os.path.join(root_dir, 'rgb')
         self.ir_dir = os.path.join(root_dir, 'ir')
@@ -39,6 +36,15 @@ class CustomDataset(Dataset):
             assert len(files3) == len(files2), f"files are different rgb:{len(files1)}, segment:{len(files3)}"
 
         self.L = len(files1)
+
+        self.sf=sf
+
+        self.composed_rgb = transforms.Compose([transforms.ToTensor(),
+                                                transforms.Normalize((0.34, 0.33, 0.35), (0.19, 0.18, 0.18))])
+
+        self.composed_ir = transforms.Compose([transforms.ToTensor(),
+                                               transforms.Normalize((0.35), (0.18))])
+
         print(f"Custom dataset initialized with {self.L} images")
 
     def __len__(self):
@@ -47,10 +53,12 @@ class CustomDataset(Dataset):
     def __getitem__(self, index):
         rgb = (io.imread(os.path.join(self.rgb_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
         # rgb = (io.imread(os.path.join(self.rgb_dir, f'{index}.jpg'))) / 255.0
+        rgb=cv2.resize(rgb, (0,0), fx=self.sf, fy=self.sf)
         rgb = self.composed_rgb(rgb)
 
         # ir = (io.imread(os.path.join(self.ir_dir, f'{index}.jpg'))) / 255.0
         ir = (io.imread(os.path.join(self.ir_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
+        ir=cv2.resize(ir, (0,0), fx=self.sf, fy=self.sf)
         ir = self.composed_ir(ir[:,:,0])
 
         if self.is_segment:

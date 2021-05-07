@@ -18,22 +18,15 @@ def main(opt):
     # Training config
     print(opt)
 
-    # # Set the directories
-    # checkpoints_dir=opt.checkpoints_dir
-    # results_dir=opt.results_dir
-    # data_dir=opt.data_dir
-
-    # t.manual_seed(0)
+    t.manual_seed(0)
 
     # Parameters
     lambda_D = 5.0
     lambda_FM = 1
     lambda_P = 0.5
 
-    epoch = 10
-    batch_size = 5
-    nf = 64
-    n_blocks = 7
+    nf = 1
+    n_blocks = 1
 
     # Load the networks
     if t.cuda.is_available():
@@ -68,15 +61,15 @@ def main(opt):
     loss_p = losses.VGGLoss()  # perceptual loss
 
     # Create dataloader
-    ds = dataset.CustomDataset(opt.data_dir, is_segment=opt.segment)
-    dataloader = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=2)
+    ds = dataset.CustomDataset(opt.data_dir, is_segment=opt.segment, sf=opt.scale_factor)
+    dataloader = DataLoader(ds, batch_size=opt.batch_size, shuffle=True, num_workers=2)
 
     # t.autograd.set_detect_anomaly(True)
 
     # Start to training
     print("Training is starting...")
     i = 0
-    for e in range(1+opt.current_epoch, 1 + epoch + opt.current_epoch):
+    for e in range(1+opt.current_epoch, 1 + opt.training_epoch + opt.current_epoch):
         print(f"---- Epoch #{e} ----")
         start = time.time()
 
@@ -102,7 +95,7 @@ def main(opt):
 
             disc_loss = (loss(out1_pred[-1], out2_pred[-1], is_real=False) + loss(out1[-1], out2[-1],
                                                                                   is_real=True)) * lambda_D
-            loss_change_d += [disc_loss.item() / batch_size]
+            loss_change_d += [disc_loss.item() / opt.batch_size]
 
             disc_loss.backward()
             optim_d.step()
@@ -118,7 +111,7 @@ def main(opt):
             gen_loss = loss(out1_pred[-1], out2_pred[-1], is_real=True) * lambda_D + \
                        fm * lambda_FM + perceptual * lambda_P
 
-            loss_change_g += [gen_loss.item() / batch_size]
+            loss_change_g += [gen_loss.item() / opt.batch_size]
 
             gen_loss.backward()
             optim_g.step()
@@ -132,7 +125,7 @@ def main(opt):
 
                 print("Losses:")
                 print(
-                    f"FM: {fm.item() / batch_size:.2f}; P: {perceptual.item() / batch_size:.2f}; G: {loss_change_g[-1]:.2f}; D: {loss_change_d[-1]:.2f}")
+                    f"FM: {fm.item() / opt.batch_size:.2f}; P: {perceptual.item() / opt.batch_size:.2f}; G: {loss_change_g[-1]:.2f}; D: {loss_change_d[-1]:.2f}")
 
         print(f"Epoch duration: {int((time.time() - start) // 60):5d}m {(time.time() - start) % 60:.1f}s")
 

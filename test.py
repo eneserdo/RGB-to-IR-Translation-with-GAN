@@ -10,6 +10,9 @@ import numpy as np
 
 def main(opt):
 
+    ngf = 64
+    n_blocks = 7
+
     # Load the networks
     if t.cuda.is_available():
         device = "cuda"
@@ -21,15 +24,17 @@ def main(opt):
     gen = networks.Generator(input_nc=3, output_nc=1, ngf=64, n_blocks=7, transposed=opt.transposed).to(device)
 
     if opt.current_epoch != 0:
-        gen.load_state_dict(t.load(os.path.join(opt.checkpoints_dir, f"generator_{opt.current_epoch}.pth")))
+        gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"generator_{opt.current_epoch}.pth")))
 
     gen.eval()
 
     try:
-        dataloader = dataset.CustomDataset()
+        ds = dataset.CustomDataset(root_dir=opt.inp_file, sf=opt.scale_factor)
     except:
         print("IR images not found but it is ok")
-        dataloader = dataset.TestDataset()
+        ds = dataset.TestDataset(root_dir=opt.inp_file)
+
+    dataloader = DataLoader(ds, batch_size=opt.batch_size, shuffle=True, num_workers=2)
 
     i = 0
 
@@ -46,12 +51,20 @@ def main(opt):
                 condition = rgb
 
             ir_pred = gen(condition)
-            utils.save_tensor_images(ir_pred, i, opt.out_dir, 'pred')
+            utils.save_tensor_images(ir_pred, i, opt.out_file, 'pred')
 
 
 if __name__ == '__main__':
 
     args = parser.TestParser()
     opt = args()
+
+    print(f"Working directory: {os.getcwd()}")
+
+    if not os.path.isdir(opt.out_file):
+        os.mkdir(opt.out_file)
+        print("Checkpoints directory was created")
+
+
     main(opt)
 
