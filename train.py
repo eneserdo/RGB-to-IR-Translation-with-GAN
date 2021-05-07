@@ -25,8 +25,8 @@ def main(opt):
     lambda_FM = 1
     lambda_P = 0.5
 
-    nf = 1
-    n_blocks = 1
+    nf = 64
+    n_blocks = 7
 
     # Load the networks
     if t.cuda.is_available():
