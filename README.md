@@ -16,7 +16,7 @@ Check out the [project webpage](https://eneserdo.github.io/RGB-to-IR-Translation
 
 # Usage
 
-Please use the ```-h ```command without further ado.
+Please use the ```-h ```command without further ado. This code designed for FLIR thermal image dataset. If you will train with different dataset, you must modify the utils.dataset file.
 
 ## Train
 
