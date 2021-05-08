@@ -22,7 +22,7 @@ class Parser:
         self.arg.add_argument('-msf', '--model_save_freq', type=int, default=3, help='Model saving frequency')
         self.arg.add_argument('-bs', '--batch_size', type=int, default=5, help='Batch size')
         self.arg.add_argument('-te', '--training_epoch', type=int, default=10, help='Number of epochs to train')
-        self.arg.add_argument('-sf', '--scale_factor', type=float, default=0.5, help='To scale the training images')
+        self.arg.add_argument('-sf', '--scale_factor', type=float, default=1., help='To scale the training images')
         self.arg.add_argument('-ls', '--lambda_second', type=float, default=1., help='Lambda of downsampled image loss')
 
         return self.arg.parse_args()
