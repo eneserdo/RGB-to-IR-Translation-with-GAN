@@ -21,12 +21,12 @@ def main(opt):
     t.manual_seed(0)
 
     # Parameters
-    lambda_D = 5.0
-    lambda_FM = 1
-    lambda_P = 0.5
+    lambda_D = 1
+    lambda_FM = 10
+    lambda_P = 10
 
-    nf = 64
-    n_blocks = 7
+    nf = 10
+    n_blocks = 1
 
     # Load the networks
     if t.cuda.is_available():
@@ -55,10 +55,14 @@ def main(opt):
     optim_g = optim.Adam(gen.parameters(), lr=0.0002, betas=(0.5, 0.999))
     optim_d = optim.Adam(disc.parameters(), lr=0.0002, betas=(0.5, 0.999))
 
+    # Create Schedulers
+    g_scheduler = t.optim.lr_scheduler.LambdaLR(optim_g, utils.lr_lambda)
+    d_scheduler = t.optim.lr_scheduler.LambdaLR(optim_d, utils.lr_lambda)
+
     # Create loss functions
     loss = losses.GanLoss()
     loss_fm = losses.FeatureMatchingLoss()
-    loss_p = losses.VGGLoss()  # perceptual loss
+    loss_p = losses.VGGLoss(device)  # perceptual loss
 
     # Create dataloader
     ds = dataset.CustomDataset(opt.data_dir, is_segment=opt.segment, sf=opt.scale_factor)
@@ -125,7 +129,11 @@ def main(opt):
 
                 print("Losses:")
                 print(
-                    f"FM: {fm.item() / opt.batch_size:.2f}; P: {perceptual.item() / opt.batch_size:.2f}; G: {loss_change_g[-1]:.2f}; D: {loss_change_d[-1]:.2f}")
+                    f"FM: {fm.item() / opt.batch_size:.4f}; P: {perceptual.item() / opt.batch_size:.4f}; G: {loss_change_g[-1]:.4f}; D: {loss_change_d[-1]:.4f}")
+
+        g_scheduler.step()
+        d_scheduler.step()
+        print(optim_g)
 
         print(f"Epoch duration: {int((time.time() - start) // 60):5d}m {(time.time() - start) % 60:.1f}s")
 

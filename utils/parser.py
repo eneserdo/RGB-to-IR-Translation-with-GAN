@@ -18,11 +18,11 @@ class Parser:
         self.arg.add_argument('--results_file', type=str, default='examples', help='Results are saved here')
         self.arg.add_argument('--data_dir', type=str, default='dataset', help='Enter the dataset directory')
         self.arg.add_argument('--amp', type=bool, default=False, help='To use automatic mixed precision')
-        self.arg.add_argument('-isf', '--img_save_freq', type=int, default=1000, help='Image saving frequency')
-        self.arg.add_argument('-msf', '--model_save_freq', type=int, default=5, help='Model saving frequency')
-        self.arg.add_argument('-bs', '--batch_size', type=int, default=5, help='Batch size')
-        self.arg.add_argument('-te', '--training_epoch', type=int, default=10, help='Number of epochs to train')
-        self.arg.add_argument('-sf', '--scale_factor', type=float, default=1.0, help='To scale the training images')
+        self.arg.add_argument('-isf', '--img_save_freq', type=int, default=1, help='Image saving frequency')
+        self.arg.add_argument('-msf', '--model_save_freq', type=int, default=1, help='Model saving frequency')
+        self.arg.add_argument('-bs', '--batch_size', type=int, default=3, help='Batch size')
+        self.arg.add_argument('-te', '--training_epoch', type=int, default=2, help='Number of epochs to train')
+        self.arg.add_argument('-sf', '--scale_factor', type=float, default=0.5, help='To scale the training images')
 
         return self.arg.parse_args()
 

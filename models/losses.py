@@ -6,9 +6,9 @@ from .networks import Vgg19
 # Perceptual Loss
 
 class VGGLoss(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super(VGGLoss, self).__init__()
-        self.vgg = Vgg19().cuda()
+        self.vgg = Vgg19().to(device)
         self.criterion = nn.L1Loss()
         self.weights = [1.0 / 32, 1.0 / 16, 1.0 / 8, 1.0 / 4, 1.0]
 
@@ -56,14 +56,15 @@ class GanLoss(nn.Module):
         self.target2_tensor_ones = t.ones_like(output2) * self.smooth
         self.target2_tensor_zeros = t.zeros_like(output2)
 
-        print("Tensors Succesfully initializied")
+        # print("Tensors Succesfully initializied")
 
         self.setted = True
 
     def forward(self, output1, output2, is_real=True):
 
-        if not self.setted:
-            self._set_tensors(output1, output2)
+        # FIXME: son epochda boyut değiştiği için problem çıkıyor
+        # if not self.setted:
+        self._set_tensors(output1, output2)
 
         if is_real:
             loss = self.criterion(self.target1_tensor_ones, output1) + self.criterion(self.target2_tensor_ones,

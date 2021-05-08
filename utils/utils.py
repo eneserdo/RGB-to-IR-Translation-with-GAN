@@ -22,9 +22,13 @@ def save_tensor_images(image_tensor, i, save_dir, prefix, resize_factor=0.5):
             mean = t.tensor([0.34, 0.33, 0.35]).reshape(1, 3, 1, 1)
             std = t.tensor([0.19, 0.18, 0.18]).reshape(1, 3, 1, 1)
 
-        elif prefix == "ir" or prefix == "pred":
+        elif prefix == "ir":
             mean = 0.35
             std = 0.18
+
+        elif prefix == "pred":
+            mean = 0.5
+            std = 0.5
 
         elif prefix == "segment":
             raise ValueError("Not implemented")
@@ -76,3 +80,8 @@ def show_loss(src_dir):
     plt.xlabel("Iteration")
     plt.legend()
     plt.show()
+
+
+def lr_lambda(epoch, decay_after=100):
+    ''' Function for scheduling learning '''
+    return 1. if epoch < decay_after else 1 - float(epoch - decay_after) / (200 - decay_after)
