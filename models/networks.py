@@ -91,7 +91,7 @@ class Discriminator(nn.Module):
 
         # TODO: norm is not implemented
 
-        self.d1 = self._conv_block(input_nc, ndf, k=3, norm=norm)
+        self.d1 = self._conv_block(input_nc, ndf, k=5, norm=norm, p=2)
 
         self.d2 = self._conv_block(ndf, ndf, k=3, norm=norm, pool=True)
 
