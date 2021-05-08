@@ -8,9 +8,15 @@ This project was done within the scope of my graduation project.
 
 Check out the [project webpage](https://eneserdo.github.io/RGB-to-IR-Translation-with-GAN/) for details
 
+## Environment
+
+1. Python 3.8
+2. Pytorch 1.6
+3. Opencv 
+
 # Usage
 
-## Training
+## Train
 
 ```
 python train.py -i $dataset_directory
