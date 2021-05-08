@@ -10,7 +10,7 @@ class Parser:
 
     def __call__(self):
 
-        self.arg.add_argument('-ce', '--current_epoch',default=0, help="Enter the epoch numper to continue the training")
+        self.arg.add_argument('-ce', '--current_epoch',default=0, type=int,  help="Enter the epoch numper to continue the training")
         self.arg.add_argument('--transposed',default=False, help="Use transposed convolution")
         self.arg.add_argument('--segment',default=False, help="Use segmentation images")
         self.arg.add_argument('--loss',default='lsgan', help="Enter the loss type: lsgan or gan")
@@ -33,7 +33,7 @@ class TestParser:
 
     def __call__(self):
 
-        self.arg.add_argument('-ce', '--current_epoch', required=True, help="Enter the epoch numper of the models")
+        self.arg.add_argument('-ce', '--current_epoch', type=int, required=True, help="Enter the epoch numper of the models")
         self.arg.add_argument('--segment',default=False, help="Use segmentation images")
         self.arg.add_argument('--checkpoints_file', type=str, default='checkpoints', help='models directory to load')
         self.arg.add_argument('-o', '--out_file', type=str, default='test_results', help='Results are saved here')

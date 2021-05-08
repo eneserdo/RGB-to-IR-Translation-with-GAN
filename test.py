@@ -1,6 +1,6 @@
 import torch as t
 from torch.utils.data import DataLoader
-import tqdm
+from tqdm.auto import tqdm
 import torch.optim as optim
 from utils import parser, utils, dataset
 from models import networks, losses
@@ -10,8 +10,8 @@ import numpy as np
 
 def main(opt):
 
-    ngf = 64
-    n_blocks = 7
+    ngf = 10
+    n_blocks = 1
 
     # Load the networks
     if t.cuda.is_available():
@@ -21,10 +21,10 @@ def main(opt):
 
     print(f"Device: {device}")
 
-    gen = networks.Generator(input_nc=3, output_nc=1, ngf=64, n_blocks=7, transposed=opt.transposed).to(device)
+    gen = networks.Generator(input_nc=3, output_nc=1, ngf=ngf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
 
-    if opt.current_epoch != 0:
-        gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"generator_{opt.current_epoch}.pth")))
+
+    gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"generator_{opt.current_epoch}.pth")))
 
     gen.eval()
 
@@ -38,7 +38,7 @@ def main(opt):
 
     i = 0
 
-    for data in dataloader:
+    for data in tqdm(dataloader):
         i += 1
         with t.no_grad():
 
@@ -52,6 +52,8 @@ def main(opt):
 
             ir_pred = gen(condition)
             utils.save_tensor_images(ir_pred, i, opt.out_file, 'pred')
+
+    print("Done!")
 
 
 if __name__ == '__main__':
