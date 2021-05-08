@@ -16,24 +16,34 @@ Check out the [project webpage](https://eneserdo.github.io/RGB-to-IR-Translation
 
 # Usage
 
+Please use the ```-h ```command without further ado.
+
 ## Train
+
+The dataset directory must have two folder named "rgb" and "ir"
 
 ```
 python train.py -i $dataset_directory
 ```
 
-Note that dataset must have two folder named "rgb" and "ir"
+Note that for resumption of the training:
+
+```
+python train.py -i $dataset_directory -ce $epoch_number_to_continue
+```
+
+
 
 ## Test
 
 ```
-python test.py -ce $Epoch_number_of_last_saved_model -i $testset_dir
+python test.py -ce $epoch_number_of_last_saved_model -i $testset_dir
 ```
 
 ## Resize
 
 If you are using FLIR thermal image dataset, keep in mind that images in the dataset have different sizes, and they are unregistered.
-To deal with this problem, you can use the following command to make the images registered (approximately). 
+To deal with this problem, you can use the following command to make the images registered (approximately). Output will be 640x512
 
 ```
 python img_resize.py -rgb $RGB_image_dir -ir $IR_image_dir
