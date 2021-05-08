@@ -51,16 +51,16 @@ def save_tensor_images(image_tensor, i, save_dir, prefix, resize_factor=0.5):
 
 def save_model(disc, gen, cur_epoch, save_dir):
 
-    t.save(disc.state_dict(), os.path.join(save_dir, f"discriminator_{cur_epoch}.pth"))
-    t.save(gen.state_dict(), os.path.join(save_dir, f"generator_{cur_epoch}.pth"))
+    t.save(disc.state_dict(), os.path.join(save_dir, f"e_{cur_epoch}_discriminator.pth"))
+    t.save(gen.state_dict(), os.path.join(save_dir, f"e_{cur_epoch}_generator.pth"))
     print("Models saved")
 
 
 def show_loss(src_dir):
-    files_d=glob.glob(os.path.join(src_dir, 'd_loss_v*.npy'))
+    files_d=glob.glob(os.path.join(src_dir, 'v*_d_loss.npy'))
     sorted_disc_loss=sorted(files_d)
 
-    files_g=glob.glob(os.path.join(src_dir, 'g_loss_v*.npy'))
+    files_g=glob.glob(os.path.join(src_dir, 'v*_g_loss.npy'))
     sorted_gen_loss=sorted(files_g)
 
     print('Reading all saved losses...')

@@ -1,3 +1,5 @@
+# TODO: resize the input images
+
 import torch as t
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
@@ -23,8 +25,7 @@ def main(opt):
 
     gen = networks.Generator(input_nc=3, output_nc=1, ngf=ngf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
 
-
-    gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"generator_{opt.current_epoch}.pth")))
+    gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"e_{opt.current_epoch}_generator.pth")))
 
     gen.eval()
 

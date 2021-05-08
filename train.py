@@ -41,8 +41,8 @@ def main(opt):
     gen = networks.Generator(input_nc=3, output_nc=1, ngf=nf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
 
     if opt.current_epoch != 0:
-        disc.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"discriminator_{opt.current_epoch}.pth")))
-        gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"generator_{opt.current_epoch}.pth")))
+        disc.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"e_{opt.current_epoch}_discriminator.pth")))
+        gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"e_{opt.current_epoch}_generator.pth")))
 
     else:
         disc.apply(utils.weights_init)
@@ -97,8 +97,9 @@ def main(opt):
 
             out1_pred, out2_pred = disc(ir_pred.detach())
 
-            disc_loss = (loss(out1_pred[-1], out2_pred[-1], is_real=False) + loss(out1[-1], out2[-1],
-                                                                                  is_real=True)) * lambda_D
+            disc_loss = (loss(out1_pred[-1], out2_pred[-1], is_real=False, lambda2=opt.lambda_second)
+                         + loss(out1[-1], out2[-1],is_real=True, lambda2=opt.lambda_second)) * lambda_D
+
             loss_change_d += [disc_loss.item() / opt.batch_size]
 
             disc_loss.backward()
@@ -112,7 +113,7 @@ def main(opt):
             fm = loss_fm(out1_pred[:-1], out1[:-1]) + loss_fm(out2_pred[:-1], out2[:-1])
             perceptual = loss_p(ir_pred, ir)
 
-            gen_loss = loss(out1_pred[-1], out2_pred[-1], is_real=True) * lambda_D + \
+            gen_loss = loss(out1_pred[-1], out2_pred[-1], is_real=True, lambda2=opt.lambda_second) * lambda_D + \
                        fm * lambda_FM + perceptual * lambda_P
 
             loss_change_g += [gen_loss.item() / opt.batch_size]
@@ -125,7 +126,7 @@ def main(opt):
                 utils.save_tensor_images(ir_pred, i, opt.results_file, 'pred')
                 utils.save_tensor_images(ir, i, opt.results_file, 'ir')
                 utils.save_tensor_images(rgb, i, opt.results_file, 'rgb')
-                print('Example images saved')
+                print('\nExample images saved')
 
                 print("Losses:")
                 print(
@@ -140,8 +141,8 @@ def main(opt):
         if i % opt.model_save_freq == 0:
             utils.save_model(disc, gen, e, opt.checkpoints_file)
 
-    np.save(os.path.join(opt.checkpoints_file, f'd_loss_v{e}.npy'), np.array(loss_change_d))
-    np.save(os.path.join(opt.checkpoints_file, f'g_loss_v{e}.npy'), np.array(loss_change_g))
+    np.save(os.path.join(opt.checkpoints_file, f'v{e}_d_loss.npy'), np.array(loss_change_d))
+    np.save(os.path.join(opt.checkpoints_file, f'v{e}_g_loss.npy'), np.array(loss_change_g))
 
     utils.save_model(disc, gen, e, opt.checkpoints_file)
 
