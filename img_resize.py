@@ -7,6 +7,7 @@ import os
 import cv2
 import tqdm
 from tqdm.auto import tqdm
+from collections import Counter
 
 from utils import parser
 
@@ -16,6 +17,7 @@ def main(rgb_dir, ir_dir, dst_rgb, dst_ir):
     files = sorted(os.listdir(rgb_dir))
     print(f"Total: {len(files)}")
 
+    # Lets say dataset has 10 image, but name of last image could be 12
     last_image_number=int(''.join(filter(str.isdigit, files[-1])))
 
     w = []  # To count white images
@@ -41,11 +43,14 @@ def main(rgb_dir, ir_dir, dst_rgb, dst_ir):
 
     k = 0
     others = 0
+    sizes=[]
 
     for i in tqdm(range(1, last_image_number + 1)):
 
         try:
             im = cv2.imread(rgb_dir + f"/FLIR_{i:0>5d}.jpg")
+            h, w, _ = im.shape
+            sizes += [(w, h)]
 
             if im.mean() > 245:
                 print(f"White image: FLIR_{i:0>5d}.jpg")
@@ -115,6 +120,10 @@ def main(rgb_dir, ir_dir, dst_rgb, dst_ir):
 
     print("*" * 10)
 
+    print("Image sizes in the directory (w x h):")
+    print(Counter(sizes))
+
+
     print(f"New dataset has {len(f_rgb)} images")
 
     print(f"Black images: #{len(b)}")
@@ -122,9 +131,7 @@ def main(rgb_dir, ir_dir, dst_rgb, dst_ir):
     print(f"Non-processed images: #{others}")
 
     """
-    Case 3: #1401
-    Case 2: #1973
-    Case 1: #4854
+    New dataset has 8228 images
     Black images: #0
     White images: #16
     Non-processed images: #119
