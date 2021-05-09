@@ -11,25 +11,15 @@ from tqdm.auto import tqdm
 from utils import parser
 
 
-def main(opt):
+def main(rgb_dir, ir_dir, dst_rgb, dst_ir):
 
-    raise NotImplemented
+    files = sorted(os.listdir(rgb_dir))
+    print(f"Total: {len(files)}")
 
-    rgb_dir = opt.rgb_dir
-    ir_dir = opt.ir_dir
-    root_dir = r"C:\Users\Enes\Desktop\datasets\flir_processed"
+    last_image_number=int(''.join(filter(str.isdigit, files[-1])))
 
-    dst_rgb = os.path.join(root_dir, "rgb")
-    dst_ir = os.path.join(root_dir, "ir")
-
-    if not os.path.isdir(os.path.join(os.getcwd(),opt.results_dir)):
-        os.mkdir(os.path.join(os.getcwd(),opt.results_dir))
-        print("Example directory was created")
-
-    _, _, files1 = next(os.walk(rgb_dir))
-
-    w = []
-    b = []
+    w = []  # To count white images
+    b = []  # To count black images
 
     # case 3
     margin_left3 = 75
@@ -52,11 +42,7 @@ def main(opt):
     k = 0
     others = 0
 
-    print(f"Total: {len(files1)}")
-
-    # name of the last image: 8862
-
-    for i in tqdm(range(1, 8862 + 1)):
+    for i in tqdm(range(1, last_image_number + 1)):
 
         try:
             im = cv2.imread(rgb_dir + f"/FLIR_{i:0>5d}.jpg")
@@ -122,11 +108,10 @@ def main(opt):
             else:
                 print(f"No such a file: FLIR_{i:0>5d}.jpg")
 
-
     f_rgb = os.listdir(dst_rgb)
     f_ir = os.listdir(dst_ir)
 
-    assert f_rgb == f_ir
+    assert len(f_rgb) == len(f_ir)
 
     print("*" * 10)
 
@@ -142,7 +127,7 @@ def main(opt):
     Case 1: #4854
     Black images: #0
     White images: #16
-    No-processed images: #119
+    Non-processed images: #119
     """
 
 
@@ -153,11 +138,22 @@ if __name__ == '__main__':
 
     print(f"Working directory: {os.getcwd()}")
 
-    if not os.path.isdir(opt.rgb_dir) or not os.path.isdir(opt.ir_dir):
+    if not os.path.isdir(opt.src_rgb) or not os.path.isdir(opt.src_ir):
         raise FileNotFoundError
 
-    if not os.path.isdir(os.path.join(os.getcwd(),opt.results_dir)):
-        os.mkdir(os.path.join(os.getcwd(),opt.results_dir))
+    if not os.path.isdir(opt.out_dir):
+        os.mkdir(opt.out_dir)
         print("Example directory was created")
 
-    main(opt)
+    dst_rgb = os.path.join(opt.out_dir, "rgb")
+    dst_ir = os.path.join(opt.out_dir, "ir")
+
+    if not os.path.isdir(dst_rgb):
+        os.mkdir(dst_rgb)
+        print("rgb directory was created")
+
+    if not os.path.isdir(dst_ir):
+        os.mkdir(dst_ir)
+        print("ir directory was created")
+
+    main(rgb_dir=opt.src_rgb, ir_dir=opt.src_ir, dst_rgb=dst_rgb, dst_ir=dst_ir)

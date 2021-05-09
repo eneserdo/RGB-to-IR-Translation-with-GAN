@@ -60,8 +60,8 @@ class ResizeParser:
     def __call__(self):
 
         self.arg.add_argument('-o', '--out_dir', type=str, default='dataset', help='Results are saved here')
-        self.arg.add_argument('-rgb', '--rgb_dir', type=str, required=True, help='Input images')
-        self.arg.add_argument('-ir', '--ir_dir', type=str, required=True, help='Input images')
+        self.arg.add_argument('-rgb', '--src_rgb', type=str, required=True, help='Input images')
+        self.arg.add_argument('-ir', '--src_ir', type=str, required=True, help='Input images')
 
         return self.arg.parse_args()
 

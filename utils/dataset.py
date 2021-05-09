@@ -46,17 +46,16 @@ class CustomDataset(Dataset):
                                                transforms.Normalize((0.35), (0.18))])
 
         print(f"Custom dataset initialized with {self.L} images")
+        print(f"Scaling factor: {self.sf} ")
 
     def __len__(self):
         return self.L
 
     def __getitem__(self, index):
         rgb = (io.imread(os.path.join(self.rgb_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
-        # rgb = (io.imread(os.path.join(self.rgb_dir, f'{index}.jpg'))) / 255.0
         rgb=cv2.resize(rgb, (0,0), fx=self.sf, fy=self.sf)
         rgb = self.composed_rgb(rgb)
 
-        # ir = (io.imread(os.path.join(self.ir_dir, f'{index}.jpg'))) / 255.0
         ir = (io.imread(os.path.join(self.ir_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
         ir=cv2.resize(ir, (0,0), fx=self.sf, fy=self.sf)
         ir = self.composed_ir(ir[:,:,0])
