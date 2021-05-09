@@ -161,7 +161,7 @@ def main(opt):
                 print(f"G: {loss_change_g[-1]:.4f}; D: {loss_change_d[-1]:.4f}")
                 print(f"G1: {loss_change_g1[-1]:.4f}; G2: {loss_change_g2[-1]:.4f}")
                 print(f"D1: {loss_change_d1[-1]:.4f}; D2: {loss_change_d2[-1]:.4f}")
-                print(f"FM1: {loss_change_fm1[-1]:.4f}; FM2: {loss_change_fm2[-1]:.4f}; P: {loss_change_p:.4f}")
+                print(f"FM1: {loss_change_fm1[-1]:.4f}; FM2: {loss_change_fm2[-1]:.4f}; P: {loss_change_p[-1]:.4f}")
 
         g_scheduler.step()
         d_scheduler.step()

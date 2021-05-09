@@ -13,17 +13,18 @@ from utils import parser
 
 def main(opt):
 
+    raise NotImplemented
+
     rgb_dir = opt.rgb_dir
     ir_dir = opt.ir_dir
     root_dir = r"C:\Users\Enes\Desktop\datasets\flir_processed"
 
-    dst_rgb1 = os.path.join(root_dir, "rgb1")
-    dst_rgb2 = os.path.join(root_dir, "rgb2")
-    dst_rgb3 = os.path.join(root_dir, "rgb3")
+    dst_rgb = os.path.join(root_dir, "rgb")
+    dst_ir = os.path.join(root_dir, "ir")
 
-    dst_ir1 = os.path.join(root_dir, "ir1")
-    dst_ir2 = os.path.join(root_dir, "ir2")
-    dst_ir3 = os.path.join(root_dir, "ir3")
+    if not os.path.isdir(os.path.join(os.getcwd(),opt.results_dir)):
+        os.mkdir(os.path.join(os.getcwd(),opt.results_dir))
+        print("Example directory was created")
 
     _, _, files1 = next(os.walk(rgb_dir))
 
@@ -51,7 +52,9 @@ def main(opt):
     k = 0
     others = 0
 
-    print(len(files1))
+    print(f"Total: {len(files1)}")
+
+    # name of the last image: 8862
 
     for i in tqdm(range(1, 8862 + 1)):
 
@@ -70,16 +73,15 @@ def main(opt):
             # case 3
             if im.shape[1] == 1280 and im.shape[0] == 1024:
 
-
                 # RGB
                 im = cv2.resize(im, (640, 512))
-                cv2.imwrite(dst_rgb3 + f"/FLIR_{k:0>5d}.jpg", im)
+                cv2.imwrite(dst_rgb + f"/FLIR_{k:0>5d}.jpg", im)
 
                 # IR
                 ir = cv2.imread(ir_dir + f"/FLIR_{i:0>5d}.jpeg")
                 ir = ir[margin_top3:512 - margin_bottom3, margin_left3:640 - margin_right3]
                 ir = cv2.resize(ir, (640, 512))
-                cv2.imwrite(dst_ir3 + f"/FLIR_{k:0>5d}.jpg", ir)
+                cv2.imwrite(dst_ir + f"/FLIR_{k:0>5d}.jpg", ir)
 
                 k += 1
 
@@ -89,13 +91,13 @@ def main(opt):
                 # RGB
                 im = im[:, 64:2048 - 64]
                 im = cv2.resize(im, (640, 512))
-                cv2.imwrite(dst_rgb2 + f"/FLIR_{k:0>5d}.jpg", im)
+                cv2.imwrite(dst_rgb + f"/FLIR_{k:0>5d}.jpg", im)
 
                 # IR
                 ir = cv2.imread(ir_dir + f"/FLIR_{i:0>5d}.jpeg")
                 ir = ir[margin_top2:512 - margin_bottom2, margin_left2:640 - margin_right2]
                 ir = cv2.resize(ir, (640, 512))
-                cv2.imwrite(dst_ir2 + f"/FLIR_{k:0>5d}.jpg", ir)
+                cv2.imwrite(dst_ir + f"/FLIR_{k:0>5d}.jpg", ir)
 
                 k += 1
 
@@ -104,10 +106,10 @@ def main(opt):
                 # RGB
                 im = im[margin_top1:1600 - margin_bottom1, margin_left1:1800 - margin_right1]
                 im = cv2.resize(im, (640, 512))
-                cv2.imwrite(dst_rgb1 + f"/FLIR_{k:0>5d}.jpg", im)
+                cv2.imwrite(dst_rgb + f"/FLIR_{k:0>5d}.jpg", im)
                 # IR
                 ir = cv2.imread(ir_dir + f"/FLIR_{i:0>5d}.jpeg")
-                cv2.imwrite(dst_ir1 + f"/FLIR_{k:0>5d}.jpg", ir)
+                cv2.imwrite(dst_ir + f"/FLIR_{k:0>5d}.jpg", ir)
 
                 k += 1
 
@@ -120,26 +122,15 @@ def main(opt):
             else:
                 print(f"No such a file: FLIR_{i:0>5d}.jpg")
 
-    _, _, f1_rgb = next(os.walk(dst_rgb1))
-    _, _, f1_ir = next(os.walk(dst_ir1))
 
-    assert f1_rgb == f1_ir
+    f_rgb = os.listdir(dst_rgb)
+    f_ir = os.listdir(dst_ir)
 
-    _, _, f2_rgb = next(os.walk(dst_rgb2))
-    _, _, f2_ir = next(os.walk(dst_ir2))
-
-    assert f2_rgb == f2_ir
-
-    _, _, f3_rgb = next(os.walk(dst_rgb3))
-    _, _, f3_ir = next(os.walk(dst_ir3))
-
-    assert f3_rgb == f3_ir
+    assert f_rgb == f_ir
 
     print("*" * 10)
 
-    print(f"Case 3: #{len(f3_rgb)}")
-    print(f"Case 2: #{len(f2_rgb)}")
-    print(f"Case 1: #{len(f1_rgb)}")
+    print(f"New dataset has {len(f_rgb)} images")
 
     print(f"Black images: #{len(b)}")
     print(f"White images: #{len(w)}")
