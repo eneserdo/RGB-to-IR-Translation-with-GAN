@@ -1,13 +1,13 @@
 # TODO: resize the input images
 
+import os
+
 import torch as t
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-import torch.optim as optim
+
+from models import networks
 from utils import parser, utils, dataset
-from models import networks, losses
-import os
-import numpy as np
 
 
 def main(opt):

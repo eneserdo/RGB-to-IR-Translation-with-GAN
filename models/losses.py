@@ -60,20 +60,17 @@ class GanLoss(nn.Module):
 
         self.setted = True
 
-    def forward(self, output1, output2, is_real=True, lambda2=1):
+    def forward(self, output1, output2, is_real=True):
 
         # FIXME: son epochda boyut değiştiği için problem çıkıyor
         # if not self.setted:
         self._set_tensors(output1, output2)
 
         if is_real:
-            loss = self.criterion(self.target1_tensor_ones, output1) + lambda2*self.criterion(self.target2_tensor_ones,
-                                                                                      output2)
-        else:
-            loss = self.criterion(self.target1_tensor_zeros, output1) + lambda2*self.criterion(self.target2_tensor_zeros,
-                                                                                       output2)
+            return self.criterion(self.target1_tensor_ones, output1), self.criterion(self.target2_tensor_ones,output2)
 
-        return loss
+        else:
+            return self.criterion(self.target1_tensor_zeros, output1), self.criterion(self.target2_tensor_zeros, output2)
 
 
 # Feature Matching Loss

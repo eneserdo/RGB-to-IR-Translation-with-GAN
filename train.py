@@ -4,14 +4,16 @@
     If you want to use different data, do not forget to modify the utils.dataset
 """
 
+import os
+import time
+
 import torch as t
+import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-import torch.optim as optim
-from utils import parser, utils, dataset
+
 from models import networks, losses
-import os, time
-import numpy as np
+from utils import parser, utils, dataset
 
 
 def main(opt):
@@ -21,12 +23,12 @@ def main(opt):
     t.manual_seed(0)
 
     # Parameters
-    lambda_D = 1
     lambda_FM = 10
     lambda_P = 10
+    lambda_2 = opt.lambda_second
 
-    nf = 64     #64
-    n_blocks = 6    #6
+    nf = 64  # 64
+    n_blocks = 6  # 6
 
     # Load the networks
     if t.cuda.is_available():
@@ -48,8 +50,18 @@ def main(opt):
         disc.apply(utils.weights_init)
         gen.apply(utils.weights_init)
 
+    # Losses to track
+    # # Main losses
     loss_change_g = []
     loss_change_d = []
+    # # Components
+    loss_change_fm1 = []
+    loss_change_fm2 = []
+    loss_change_d1 = []
+    loss_change_d2 = []
+    loss_change_g1 = []
+    loss_change_g2 = []
+    loss_change_p = []
 
     # Create optimizers
     optim_g = optim.Adam(gen.parameters(), lr=0.0002, betas=(0.5, 0.999))
@@ -68,12 +80,10 @@ def main(opt):
     ds = dataset.CustomDataset(opt.data_dir, is_segment=opt.segment, sf=opt.scale_factor)
     dataloader = DataLoader(ds, batch_size=opt.batch_size, shuffle=True, num_workers=2)
 
-    # t.autograd.set_detect_anomaly(True)
-
     # Start to training
     print("Training is starting...")
     i = 0
-    for e in range(1+opt.current_epoch, 1 + opt.training_epoch + opt.current_epoch):
+    for e in range(1 + opt.current_epoch, 1 + opt.training_epoch + opt.current_epoch):
         print(f"---- Epoch #{e} ----")
         start = time.time()
 
@@ -92,31 +102,50 @@ def main(opt):
             out1, out2 = disc(ir)
             ir_pred = gen(condition)
 
-            # Updating Discriminator
+            # # # Updating Discriminator # # #
             optim_d.zero_grad()
 
-            out1_pred, out2_pred = disc(ir_pred.detach())
+            out1_pred, out2_pred = disc(ir_pred.detach())   # It returns a list [fms... + output]
 
-            disc_loss = (loss(out1_pred[-1], out2_pred[-1], is_real=False, lambda2=opt.lambda_second)
-                         + loss(out1[-1], out2[-1],is_real=True, lambda2=opt.lambda_second)) * lambda_D
+            l_d_pred1, l_d_pred2 = loss(out1_pred[-1], out2_pred[-1], is_real=False)
+            l_d_real1, l_d_real2 = loss(out1[-1], out2[-1], is_real=True)
 
+            l_d_scale1 = l_d_pred1 + l_d_real1
+            l_d_scale2 = l_d_pred2 + l_d_real2
+
+            disc_loss = l_d_scale1 + l_d_scale2 * lambda_2
+
+            # Normalize the loss, and track
             loss_change_d += [disc_loss.item() / opt.batch_size]
+            loss_change_d1 += [l_d_scale1.item() / opt.batch_size]
+            loss_change_d2 += [l_d_scale2.item() / opt.batch_size]
 
             disc_loss.backward()
             optim_d.step()
 
-            # Updating Generator
+            # # # Updating Generator # # #
             optim_g.zero_grad()
 
-            out1_pred, out2_pred = disc(ir_pred)
+            out1_pred, out2_pred = disc(ir_pred)    # It returns a list [fms... + output]
 
-            fm = loss_fm(out1_pred[:-1], out1[:-1]) + loss_fm(out2_pred[:-1], out2[:-1])
+            fm_scale1 = loss_fm(out1_pred[:-1], out1[:-1])
+            fm_scale2 = loss_fm(out2_pred[:-1], out2[:-1])
+
+            fm = fm_scale1 + fm_scale2 * lambda_2
+
             perceptual = loss_p(ir_pred, ir)
 
-            gen_loss = loss(out1_pred[-1], out2_pred[-1], is_real=True, lambda2=opt.lambda_second) * lambda_D + \
-                       fm * lambda_FM + perceptual * lambda_P
+            loss_change_fm1 += [fm_scale1.item() / opt.batch_size]
+            loss_change_fm2 += [fm_scale2.item() / opt.batch_size]
+
+            loss_change_p += [perceptual.item() / opt.batch_size]
+
+            l_g_scale1, l_g_scale2 = loss(out1_pred[-1], out2_pred[-1], is_real=True)
+            gen_loss = l_g_scale1 + l_g_scale2 * lambda_2 + fm * lambda_FM + perceptual * lambda_P
 
             loss_change_g += [gen_loss.item() / opt.batch_size]
+            loss_change_g1 += [l_g_scale1.item() / opt.batch_size]
+            loss_change_g2 += [l_g_scale2.item() / opt.batch_size]
 
             gen_loss.backward()
             optim_g.step()
@@ -129,8 +158,10 @@ def main(opt):
                 print('\nExample images saved')
 
                 print("Losses:")
-                print(
-                    f"FM: {fm.item() / opt.batch_size:.4f}; P: {perceptual.item() / opt.batch_size:.4f}; G: {loss_change_g[-1]:.4f}; D: {loss_change_d[-1]:.4f}")
+                print(f"G: {loss_change_g[-1]:.4f}; D: {loss_change_d[-1]:.4f}")
+                print(f"G1: {loss_change_g1[-1]:.4f}; G2: {loss_change_g2[-1]:.4f}")
+                print(f"D1: {loss_change_d1[-1]:.4f}; D2: {loss_change_d2[-1]:.4f}")
+                print(f"FM1: {loss_change_fm1[-1]:.4f}; FM2: {loss_change_fm2[-1]:.4f}; P: {loss_change_p:.4f}")
 
         g_scheduler.step()
         d_scheduler.step()
@@ -140,9 +171,13 @@ def main(opt):
 
         if i % opt.model_save_freq == 0:
             utils.save_model(disc, gen, e, opt.checkpoints_file)
+    # End of training
 
-    np.save(os.path.join(opt.checkpoints_file, f'v{e}_d_loss.npy'), np.array(loss_change_d))
-    np.save(os.path.join(opt.checkpoints_file, f'v{e}_g_loss.npy'), np.array(loss_change_g))
+    # Main losses are g and d, but I want to save all components separately
+    utils.save_loss(d=loss_change_d, d1=loss_change_d1, d2=loss_change_d2,
+                    g=loss_change_g, g1=loss_change_g1, g2=loss_change_g2,
+                    fm1=loss_change_fm1, fm2=loss_change_fm2, p=loss_change_p,
+                    path=opt.loss_file, e=e)
 
     utils.save_model(disc, gen, e, opt.checkpoints_file)
 
@@ -159,11 +194,15 @@ if __name__ == '__main__':
 
     if not os.path.isdir(opt.checkpoints_file):
         os.mkdir(opt.checkpoints_file)
-        print("Checkpoints directory was created")
+        print("checkpoints directory was created")
 
     if not os.path.isdir(opt.results_file):
         os.mkdir(opt.results_file)
-        print("Example directory was created")
+        print("example directory was created")
+
+    if not os.path.isdir(opt.loss_file):
+        os.mkdir(opt.loss_file)
+        print("tracked_losses directory was created")
 
     if opt.amp:
         raise Warning("AMP is not implemented yet")

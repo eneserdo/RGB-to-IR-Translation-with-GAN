@@ -2,11 +2,12 @@
     This is specifically designed to resize the FLIR thermal image dataset.
 """
 
+import os
+
 import cv2
-import glob, os
 import tqdm
-from collections import Counter
 from tqdm.auto import tqdm
+
 from utils import parser
 
 

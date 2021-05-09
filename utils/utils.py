@@ -1,11 +1,13 @@
-import torch as t
-import torch.nn as nn
-from torchvision.utils import make_grid
-import numpy as np
-import matplotlib.pyplot as plt
-import time, os, cv2
-from skimage import io
+import cv2
 import glob
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+import torch as t
+from skimage import io
+from torchvision.utils import make_grid
+
 
 def weights_init(m):
     classname = m.__class__.__name__
@@ -74,7 +76,6 @@ def show_loss(src_dir):
 
         arr_d=np.concatenate([arr_d, np.load(sorted_disc_loss[l])])
 
-
     plt.plot(np.arange(arr_d.shape[0]), arr_d, color='orange', label='Discriminator')
     plt.plot(np.arange(arr_g.shape[0]), arr_g, color='blue', label='Generator')
     plt.ylabel("Loss")
@@ -82,6 +83,19 @@ def show_loss(src_dir):
     plt.legend()
     plt.show()
 
+def save_loss(d,d1,d2,g,g1,g2,fm1,fm2, p, path, e):
+
+    np.save(os.path.join(path, f'v{e}_d_loss.npy'), np.array(d))
+    np.save(os.path.join(path, f'v{e}_d1_loss.npy'), np.array(d1))
+    np.save(os.path.join(path, f'v{e}_d2_loss.npy'), np.array(d2))
+
+    np.save(os.path.join(path, f'v{e}_g_loss.npy'), np.array(g))
+    np.save(os.path.join(path, f'v{e}_g1_loss.npy'), np.array(g1))
+    np.save(os.path.join(path, f'v{e}_g2_loss.npy'), np.array(g2))
+
+    np.save(os.path.join(path, f'v{e}_fm1_loss.npy'), np.array(fm1))
+    np.save(os.path.join(path, f'v{e}_fm2_loss.npy'), np.array(fm2))
+    np.save(os.path.join(path, f'v{e}_p_loss.npy'), np.array(p))
 
 def lr_lambda(epoch, decay_after=100):
     ''' Function for scheduling learning '''
