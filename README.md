@@ -11,7 +11,7 @@ Check out the [project webpage](https://eneserdo.github.io/RGB-to-IR-Translation
 ## Environment
 
 1. Python 3.8
-2. Pytorch 1.6
+2. Pytorch 1.6 or higher
 3. Opencv 
 
 # Usage
