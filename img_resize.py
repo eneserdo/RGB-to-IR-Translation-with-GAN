@@ -20,8 +20,8 @@ def main(rgb_dir, ir_dir, dst_rgb, dst_ir):
     # Lets say dataset has 10 image, but name of last image could be 12
     last_image_number=int(''.join(filter(str.isdigit, files[-1])))
 
-    w = []  # To count white images
-    b = []  # To count black images
+    white = []  # To count white images
+    black = []  # To count black images
 
     # case 3
     margin_left3 = 75
@@ -54,11 +54,11 @@ def main(rgb_dir, ir_dir, dst_rgb, dst_ir):
 
             if im.mean() > 245:
                 print(f"White image: FLIR_{i:0>5d}.jpg")
-                w += [f"FLIR_{i:0>5d}.jpg"]
+                white += [f"FLIR_{i:0>5d}.jpg"]
                 continue
             elif im.mean() < 5:
                 print(f"Black image: FLIR_{i:0>5d}.jpg")
-                b += [f"FLIR_{i:0>5d}.jpg"]
+                black += [f"FLIR_{i:0>5d}.jpg"]
                 continue
 
             # case 3
@@ -109,9 +109,10 @@ def main(rgb_dir, ir_dir, dst_rgb, dst_ir):
         except:
             if os.path.isfile(rgb_dir + f"/FLIR_{i:0>5d}.jpg"):
                 print(f"Error: FLIR_{i:0>5d}.jpg exists but cannot be read")
-                raise Exception("???")
+                # raise Exception("???")
             else:
                 print(f"No such a file: FLIR_{i:0>5d}.jpg")
+
 
     f_rgb = os.listdir(dst_rgb)
     f_ir = os.listdir(dst_ir)
@@ -126,8 +127,8 @@ def main(rgb_dir, ir_dir, dst_rgb, dst_ir):
 
     print(f"New dataset has {len(f_rgb)} images")
 
-    print(f"Black images: #{len(b)}")
-    print(f"White images: #{len(w)}")
+    print(f"Black images: #{len(black)}")
+    print(f"White images: #{len(white)}")
     print(f"Non-processed images: #{others}")
 
     """
