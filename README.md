@@ -8,11 +8,13 @@ This project was done within the scope of my graduation project.
 
 Check out the [project webpage](https://eneserdo.github.io/RGB-to-IR-Translation-with-GAN/) for details
 
-## Environment
+## Requirements
 
-1. Python 3.8
-2. Pytorch 1.6 or higher
-3. Opencv 
+* Python 3.8
+* Pytorch 1.6 or higher
+* Opencv 
+* tqdm
+* scikit-image
 
 # Usage
 
@@ -26,7 +28,7 @@ The dataset directory must have two folder named "rgb" and "ir"
 python train.py -i $dataset_directory
 ```
 
-Note that for resumption of the training:
+Note that for resumption of the training, use the following command
 
 ```
 python train.py -i $dataset_directory -ce $epoch_number_to_continue
