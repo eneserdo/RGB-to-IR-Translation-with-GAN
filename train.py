@@ -67,12 +67,12 @@ def main(opt):
     loss_change_p = []
 
     # Create optimizers
-    optim_g = optim.Adam(gen.parameters(), lr=0.0002, betas=(0.5, 0.999))
-    optim_d = optim.Adam(disc.parameters(), lr=0.0002, betas=(0.5, 0.999))
+    optim_g = optim.Adam(gen.parameters(), lr=opt.learning_rate, betas=(0.5, 0.999))
+    optim_d = optim.Adam(disc.parameters(), lr=opt.learning_rate, betas=(0.5, 0.999))
 
     # Create Schedulers
-    g_scheduler = t.optim.lr_scheduler.LambdaLR(optim_g, utils.lr_lambda)
-    d_scheduler = t.optim.lr_scheduler.LambdaLR(optim_d, utils.lr_lambda)
+    # g_scheduler = t.optim.lr_scheduler.LambdaLR(optim_g, utils.lr_lambda)
+    # d_scheduler = t.optim.lr_scheduler.LambdaLR(optim_d, utils.lr_lambda)
 
     # Create loss functions
     loss = losses.GanLoss()
@@ -166,9 +166,8 @@ def main(opt):
                 print(f"D1: {loss_change_d1[-1]:.4f}; D2: {loss_change_d2[-1]:.4f}")
                 print(f"FM1: {loss_change_fm1[-1]:.4f}; FM2: {loss_change_fm2[-1]:.4f}; P: {loss_change_p[-1]:.4f}")
 
-        g_scheduler.step()
-        d_scheduler.step()
-        print(optim_g)
+        # g_scheduler.step()
+        # d_scheduler.step()
 
         print(f"Epoch duration: {int((time.time() - start) // 60):5d}m {(time.time() - start) % 60:.1f}s")
 

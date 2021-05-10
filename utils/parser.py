@@ -16,6 +16,7 @@ class Parser:
 
         self.arg.add_argument('-sf', '--scale_factor', type=float, default=0.5, help='To scale the training images')
         self.arg.add_argument('-ls', '--lambda_second', type=float, default=1., help='Lambda of downsampled image loss')
+        self.arg.add_argument('-lr', '--learning_rate', type=float, default=0.0002, help='Learning rate')
         self.arg.add_argument('-s', '--silent', type=bool, default=False, help='Usage of print function will be minimum')
         self.arg.add_argument('--transposed',default=False, help="Use transposed convolution")
         self.arg.add_argument('--segment',default=False, help="Use segmentation images")
