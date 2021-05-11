@@ -29,7 +29,7 @@ def main(opt):
 
     nf = 64  # 64
     n_blocks = 6  # 6
-
+    #s
     # Load the networks
     if t.cuda.is_available():
         device = "cuda"
