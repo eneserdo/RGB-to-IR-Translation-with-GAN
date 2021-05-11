@@ -50,6 +50,33 @@ def save_tensor_images(image_tensor, i, save_dir, prefix, resize_factor=0.5):
         name = prefix + str(i) + r'.jpg'
         io.imsave(os.path.join(save_dir, name), img)
 
+def save_all_images(rgb, ir, pred, i, save_dir, resize_factor=0.5):
+    with t.no_grad():
+
+        mean_rgb = t.tensor([0.34, 0.33, 0.35]).reshape(1, 3, 1, 1)
+        std_rgb = t.tensor([0.19, 0.18, 0.18]).reshape(1, 3, 1, 1)
+
+        mean_ir = 0.35
+        std_ir = 0.18
+
+        ir_n = ir.detach().cpu() * std_ir + mean_ir
+
+        pred_n = pred.detach().cpu() * std_ir + mean_ir
+
+        rgb_n = rgb.detach().cpu() * std_rgb + mean_rgb
+
+        image_unflat = t.cat([pred_n, ir_n, rgb_n], dim=0)
+
+        image_grid = make_grid(image_unflat, nrow=2)
+
+        img = image_grid.permute(1, 2, 0).squeeze().numpy()
+        img = np.clip(img * 255, a_min=0, a_max=255).astype(np.uint8)
+
+        img = cv2.resize(img, (0, 0), fx=resize_factor, fy=resize_factor)
+
+        io.imsave(os.path.join(save_dir, f"super{i:0>4d}.jpg"), img)
+
+
 
 def save_model(disc, gen, cur_epoch, save_dir):
     t.save(disc.state_dict(), os.path.join(save_dir, f"e_{cur_epoch}_discriminator.pth"))

@@ -12,8 +12,8 @@ from utils import parser, utils, dataset
 
 def main(opt):
 
-    ngf = 10
-    n_blocks = 1
+    ngf = 64
+    n_blocks = 6
 
     # Load the networks
     if t.cuda.is_available():
@@ -35,7 +35,7 @@ def main(opt):
         print("IR images not found but it is ok")
         ds = dataset.TestDataset(root_dir=opt.inp_file)
 
-    dataloader = DataLoader(ds, batch_size=opt.batch_size, shuffle=True, num_workers=2)
+    dataloader = DataLoader(ds, batch_size=opt.batch_size, shuffle=False, num_workers=2)
 
     i = 0
 
@@ -44,6 +44,8 @@ def main(opt):
         with t.no_grad():
 
             rgb = data[0].to(device)
+            ir = data[1]
+
 
             if opt.segment:
                 segment = data[-1].to(device)
@@ -52,7 +54,7 @@ def main(opt):
                 condition = rgb
 
             ir_pred = gen(condition)
-            utils.save_tensor_images(ir_pred, i, opt.out_file, 'pred')
+            utils.save_all_images(rgb, ir, ir_pred, i, opt.out_file, resize_factor=1.0)
 
     print("Done!")
 
