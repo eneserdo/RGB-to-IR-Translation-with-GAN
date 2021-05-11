@@ -54,7 +54,7 @@ def main(opt):
                 condition = rgb
 
             ir_pred = gen(condition)
-            utils.save_all_images(rgb, ir, ir_pred, i, opt.out_file, resize_factor=1.0)
+            utils.save_all_images(rgb, ir, ir_pred, i, opt.out_file, resize_factor=1.)
 
     print("Done!")
 
