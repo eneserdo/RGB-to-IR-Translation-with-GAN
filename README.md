@@ -12,6 +12,7 @@ Check out the [project webpage](https://eneserdo.github.io/RGB-to-IR-Translation
 
 * Python 3.8
 * Pytorch 1.6 or higher
+* [keras-segmentation](https://github.com/divamgupta/image-segmentation-keras) if you want to use image segmentations 
 * Opencv 
 * tqdm
 * scikit-image
