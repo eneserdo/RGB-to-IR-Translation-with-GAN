@@ -35,6 +35,11 @@ class CustomDataset(Dataset):
             _, _, files3 = next(os.walk(self.segment_dir))
             assert len(files3) == len(files2), f"files are different rgb:{len(files1)}, segment:{len(files3)}"
 
+            self.composed_segment = transforms.Compose([transforms.ToTensor(),
+                                                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5,0.5))])
+
+            print("Segment file is loaded")
+
         self.L = len(files1)
 
         self.sf=sf
@@ -61,7 +66,9 @@ class CustomDataset(Dataset):
         ir = self.composed_ir(ir[:,:,0])
 
         if self.is_segment:
-            segment = (io.imread(os.path.join(self.segment_dir, f'{index}.jpg'))) / 255.0
+            segment = (io.imread(os.path.join(self.segment_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
+            segment = cv2.resize(segment, (0, 0), fx=self.sf, fy=self.sf)
+            segment = self.composed_segment(segment)
 
             return [rgb.float(), ir.float(), segment.float()]
 
@@ -101,7 +108,9 @@ class TestDataset(Dataset):
         rgb = self.composed_rgb(rgb)
 
         if self.is_segment:
-            segment = (io.imread(os.path.join(self.segment_dir, f'{index}.jpg'))) / 255.0
+            segment = (io.imread(os.path.join(self.segment_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
+            segment = cv2.resize(segment, (0, 0), fx=self.sf, fy=self.sf)
+            segment = self.composed_segment(segment)
 
             return [rgb.float(), segment.float()]
 

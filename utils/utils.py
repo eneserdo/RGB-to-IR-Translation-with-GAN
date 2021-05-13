@@ -24,13 +24,14 @@ def save_tensor_images(image_tensor, i, save_dir, prefix, resize_factor=0.5):
             mean = t.tensor([0.34, 0.33, 0.35]).reshape(1, 3, 1, 1)
             std = t.tensor([0.19, 0.18, 0.18]).reshape(1, 3, 1, 1)
 
-        elif prefix == "ir" or prefix == 'pred':
+        elif prefix == "ir":
             mean = 0.35
             std = 0.18
 
-        # elif prefix == "pred":
-        #     mean = 0.5
-        #     std = 0.5
+        elif prefix == "pred":
+            mean = 0.5
+            std = 0.5
+
 
         elif prefix == "segment":
             raise ValueError("Not implemented")
@@ -38,9 +39,14 @@ def save_tensor_images(image_tensor, i, save_dir, prefix, resize_factor=0.5):
         else:
             raise TypeError("Name error")
 
+
+        print(max(image_tensor.detach().cpu()))
+        print(min(image_tensor.detach().cpu()))
+
         # image_tensor = (image_tensor + 1) / 2
         image_unflat = image_tensor.detach().cpu() * std + mean
         # image_unflat = image_tensor.detach().cpu()
+
         image_grid = make_grid(image_unflat, nrow=3)
 
         img = image_grid.permute(1, 2, 0).squeeze().numpy()
@@ -79,8 +85,8 @@ def save_all_images(rgb, ir, pred, i, save_dir, resize_factor=0.5):
 
 
 def save_model(disc, gen, cur_epoch, save_dir):
-    t.save(disc.state_dict(), os.path.join(save_dir, f"e_{cur_epoch}_discriminator.pth"))
-    t.save(gen.state_dict(), os.path.join(save_dir, f"e_{cur_epoch}_generator.pth"))
+    t.save(disc.state_dict(), os.path.join(save_dir, f"e_{cur_epoch:0>3d}_discriminator.pth"))
+    t.save(gen.state_dict(), os.path.join(save_dir, f"e_{cur_epoch:0>3d}_generator.pth"))
     print("Models saved")
 
 
@@ -110,19 +116,21 @@ def show_loss(src_dir):
 
 
 def save_loss(d, d1, d2, g, g1, g2, fm1, fm2, p, path, e):
-    np.save(os.path.join(path, f'v{e}_d_loss.npy'), np.array(d))
-    np.save(os.path.join(path, f'v{e}_d1_loss.npy'), np.array(d1))
-    np.save(os.path.join(path, f'v{e}_d2_loss.npy'), np.array(d2))
+    np.save(os.path.join(path, f'v{e:0>3d}_d_loss.npy'), np.array(d))
+    np.save(os.path.join(path, f'v{e:0>3d}_d1_loss.npy'), np.array(d1))
+    np.save(os.path.join(path, f'v{e:0>3d}_d2_loss.npy'), np.array(d2))
 
-    np.save(os.path.join(path, f'v{e}_g_loss.npy'), np.array(g))
-    np.save(os.path.join(path, f'v{e}_g1_loss.npy'), np.array(g1))
-    np.save(os.path.join(path, f'v{e}_g2_loss.npy'), np.array(g2))
+    np.save(os.path.join(path, f'v{e:0>3d}_g_loss.npy'), np.array(g))
+    np.save(os.path.join(path, f'v{e:0>3d}_g1_loss.npy'), np.array(g1))
+    np.save(os.path.join(path, f'v{e:0>3d}_g2_loss.npy'), np.array(g2))
 
-    np.save(os.path.join(path, f'v{e}_fm1_loss.npy'), np.array(fm1))
-    np.save(os.path.join(path, f'v{e}_fm2_loss.npy'), np.array(fm2))
-    np.save(os.path.join(path, f'v{e}_p_loss.npy'), np.array(p))
+    np.save(os.path.join(path, f'v{e:0>3d}_fm1_loss.npy'), np.array(fm1))
+    np.save(os.path.join(path, f'v{e:0>3d}_fm2_loss.npy'), np.array(fm2))
+    np.save(os.path.join(path, f'v{e:0>3d}_p_loss.npy'), np.array(p))
 
 
 def lr_lambda(epoch, decay_after=100):
     ''' Function for scheduling learning '''
     return 1. if epoch < decay_after else 1 - float(epoch - decay_after) / (200 - decay_after)
+
+

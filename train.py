@@ -38,15 +38,19 @@ def main(opt):
 
     print(f"Device: {device}")
 
-    # TODO: if segment exists modify input_nc
-    disc = networks.MultiScaleDisc(input_nc=1, ndf=nf).to(device)
-    gen = networks.Generator(input_nc=3, output_nc=1, ngf=nf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
+    if opt.segment:
+        pass
+        disc = networks.MultiScaleDisc(input_nc=4, ndf=nf).to(device)
+        gen = networks.Generator(input_nc=6, output_nc=1, ngf=nf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
+    else:
+        disc = networks.MultiScaleDisc(input_nc=1, ndf=nf).to(device)
+        gen = networks.Generator(input_nc=3, output_nc=1, ngf=nf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
 
     if opt.current_epoch != 0:
-        disc.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"e_{opt.current_epoch}_discriminator.pth")))
-        gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"e_{opt.current_epoch}_generator.pth")))
-        print(f"e_{opt.current_epoch}_generator.pth was loaded")
-        print(f"e_{opt.current_epoch}_discriminator.pth was loaded")
+        disc.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"e_{opt.current_epoch:0>3d}_discriminator.pth")))
+        gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"e_{opt.current_epoch:0>3d}_generator.pth")))
+        print(f"e_{opt.current_epoch:0>3d}_generator.pth was loaded")
+        print(f"e_{opt.current_epoch:0>3d}_discriminator.pth was loaded")
 
     else:
         disc.apply(utils.weights_init)
@@ -67,8 +71,8 @@ def main(opt):
     loss_change_p = []
 
     # Create optimizers
-    optim_g = optim.Adam(gen.parameters(), lr=opt.learning_rate, betas=(0.5, 0.999))
-    optim_d = optim.Adam(disc.parameters(), lr=opt.learning_rate, betas=(0.5, 0.999))
+    optim_g = optim.Adam(gen.parameters(), lr=opt.learning_rate/5, betas=(0.5, 0.999))
+    optim_d = optim.Adam(disc.parameters(), lr=opt.learning_rate, betas=(0.5, 0.999), weight_decay=0.0001)
 
     # Create Schedulers
     # g_scheduler = t.optim.lr_scheduler.LambdaLR(optim_g, utils.lr_lambda)
@@ -79,7 +83,7 @@ def main(opt):
     loss_fm = losses.FeatureMatchingLoss()
     loss_p = losses.VGGLoss(device)  # perceptual loss
 
-    # Create dataloader
+    # Create dataloaderz
     ds = dataset.CustomDataset(opt.data_dir, is_segment=opt.segment, sf=opt.scale_factor)
     dataloader = DataLoader(ds, batch_size=opt.batch_size, shuffle=True, num_workers=2)
 

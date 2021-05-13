@@ -93,15 +93,15 @@ class Discriminator(nn.Module):
 
         self.d1 = self._conv_block(input_nc, ndf, k=5, norm=norm, p=2)
 
-        self.d2 = self._conv_block(ndf, ndf, k=3, norm=norm, pool=True)
+        self.d2 = self._conv_block(ndf, ndf*2, k=3, norm=norm, pool=True)
 
-        self.d3 = self._conv_block(ndf, ndf * 2, k=3, norm=norm)
+        self.d3 = self._conv_block(ndf*2, ndf * 4, k=3, norm=norm)
 
-        self.d4 = self._conv_block(ndf * 2, ndf * 4, k=3, norm=norm, pool=True, drop=True)
+        self.d4 = self._conv_block(ndf * 4, ndf * 8, k=3, norm=norm, pool=True, drop=True)
 
-        self.d5 = self._conv_block(ndf * 4, ndf * 4, k=3, norm=norm)
+        self.d5 = self._conv_block(ndf * 8, ndf * 8, k=3, norm=norm)
 
-        self.d6 = self._conv_block(ndf * 4, 1, k=3, norm=norm, pool=True, drop=True)
+        self.d6 = self._conv_block(ndf * 8, 1, k=3, norm=norm, pool=True, drop=True)
 
     def _conv_block(self, in_ch, out_ch, k, s=1, p=1, norm=nn.BatchNorm2d, pool=False, drop=False):
 

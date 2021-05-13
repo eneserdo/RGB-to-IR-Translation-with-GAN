@@ -66,3 +66,14 @@ class ResizeParser:
 
         return self.arg.parse_args()
 
+
+class SegmentParser:
+    def __init__(self, des):
+        self.arg=argparse.ArgumentParser(description=des)
+
+    def __call__(self):
+
+        self.arg.add_argument('-o', '--out_dir', type=str, default='segment', help='Results are saved here')
+        self.arg.add_argument('-i', '--src_rgb', type=str, required=True, help='Input images')
+
+        return self.arg.parse_args()
