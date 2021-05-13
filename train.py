@@ -29,7 +29,7 @@ def main(opt):
 
     nf = 64  # 64
     n_blocks = 6  # 6
-    #s
+
     # Load the networks
     if t.cuda.is_available():
         device = "cuda"
@@ -83,7 +83,7 @@ def main(opt):
     loss_fm = losses.FeatureMatchingLoss()
     loss_p = losses.VGGLoss(device)  # perceptual loss
 
-    # Create dataloaderz
+    # Create dataloader
     ds = dataset.CustomDataset(opt.data_dir, is_segment=opt.segment, sf=opt.scale_factor)
     dataloader = DataLoader(ds, batch_size=opt.batch_size, shuffle=True, num_workers=2)
 

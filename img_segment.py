@@ -4,22 +4,23 @@
 """
 
 from keras_segmentation.pretrained import pspnet_101_cityscapes
-from keras import backend as K
-from utils import parser
-import os
+
 from tqdm.auto import tqdm
+import os
+
+from utils import parser
 
 
 def main(opt):
-
-    K.tensorflow_backend._get_available_gpus()
 
     model = pspnet_101_cityscapes()
 
     files = sorted(os.listdir(opt.rgb_dir))
     print(f"Total: {len(files)}")
+    print(f"Processing from {1000*opt.part} to {1000*(opt.part+1)} ...")
+    partial = files[1000*opt.part:1000*(opt.part+1)]
 
-    for f in tqdm(files):
+    for f in tqdm(partial):
         out = model.predict_segmentation(
             inp=os.path.join(opt.src_rgb, f),
             out_fname=os.path.join(opt.out_dir, f))
@@ -27,7 +28,7 @@ def main(opt):
 
 if __name__ == '__main__':
 
-    args = parser.ResizeParser(__doc__)
+    args = parser.SegmentParser(__doc__)
     opt = args()
 
     print(f"Working directory: {os.getcwd()}")

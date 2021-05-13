@@ -75,5 +75,6 @@ class SegmentParser:
 
         self.arg.add_argument('-o', '--out_dir', type=str, default='segment', help='Results are saved here')
         self.arg.add_argument('-i', '--src_rgb', type=str, required=True, help='Input images')
+        self.arg.add_argument('-p', '--part', type=int, required=True, help='Part of the dataset')
 
         return self.arg.parse_args()
