@@ -15,10 +15,10 @@ def main(opt):
 
     model = pspnet_101_cityscapes()
 
-    files = sorted(os.listdir(opt.rgb_dir))
+    files = sorted(os.listdir(opt.src_rgb))
     print(f"Total: {len(files)}")
-    print(f"Processing from {1000*opt.part} to {1000*(opt.part+1)} ...")
-    partial = files[1000*opt.part:1000*(opt.part+1)]
+    print(f"Processing from {500*opt.part} to {500*(opt.part+1)} ...")
+    partial = files[500*opt.part:500*(opt.part+1)]
 
     for f in tqdm(partial):
         out = model.predict_segmentation(
