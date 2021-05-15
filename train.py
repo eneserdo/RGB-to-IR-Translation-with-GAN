@@ -39,7 +39,6 @@ def main(opt):
     print(f"Device: {device}")
 
     if opt.segment:
-        pass
         disc = networks.MultiScaleDisc(input_nc=4, ndf=nf).to(device)
         gen = networks.Generator(input_nc=6, output_nc=1, ngf=nf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
     else:
@@ -70,7 +69,7 @@ def main(opt):
     loss_change_g2 = []
     loss_change_p = []
 
-    # Create optimizers
+    # Create optimizers (Notice the lr of discriminator)
     optim_g = optim.Adam(gen.parameters(), lr=opt.learning_rate/5, betas=(0.5, 0.999))
     optim_d = optim.Adam(disc.parameters(), lr=opt.learning_rate, betas=(0.5, 0.999), weight_decay=0.0001)
 

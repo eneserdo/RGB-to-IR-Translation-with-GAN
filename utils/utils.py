@@ -90,29 +90,29 @@ def save_model(disc, gen, cur_epoch, save_dir):
     print("Models saved")
 
 
-def show_loss(src_dir):
-    files_d = glob.glob(os.path.join(src_dir, 'v*_d_loss.npy'))
-    sorted_disc_loss = sorted(files_d)
-
-    files_g = glob.glob(os.path.join(src_dir, 'v*_g_loss.npy'))
-    sorted_gen_loss = sorted(files_g)
-
-    print('Reading all saved losses...')
-    # print(sorted_disc_loss)
-    arr_g = np.array([])
-    arr_d = np.array([])
-
-    for l in range(len(sorted_gen_loss)):
-        arr_g = np.concatenate([arr_g, np.load(sorted_gen_loss[l])])
-
-        arr_d = np.concatenate([arr_d, np.load(sorted_disc_loss[l])])
-
-    plt.plot(np.arange(arr_d.shape[0]), arr_d, color='orange', label='Discriminator')
-    plt.plot(np.arange(arr_g.shape[0]), arr_g, color='blue', label='Generator')
-    plt.ylabel("Loss")
-    plt.xlabel("Iteration")
-    plt.legend()
-    plt.show()
+# def show_loss(src_dir):
+#     files_d = glob.glob(os.path.join(src_dir, 'v*_d_loss.npy'))
+#     sorted_disc_loss = sorted(files_d)
+#
+#     files_g = glob.glob(os.path.join(src_dir, 'v*_g_loss.npy'))
+#     sorted_gen_loss = sorted(files_g)
+#
+#     print('Reading all saved losses...')
+#     # print(sorted_disc_loss)
+#     arr_g = np.array([])
+#     arr_d = np.array([])
+#
+#     for l in range(len(sorted_gen_loss)):
+#         arr_g = np.concatenate([arr_g, np.load(sorted_gen_loss[l])])
+#
+#         arr_d = np.concatenate([arr_d, np.load(sorted_disc_loss[l])])
+#
+#     plt.plot(np.arange(arr_d.shape[0]), arr_d, color='orange', label='Discriminator')
+#     plt.plot(np.arange(arr_g.shape[0]), arr_g, color='blue', label='Generator')
+#     plt.ylabel("Loss")
+#     plt.xlabel("Iteration")
+#     plt.legend()
+#     plt.show()
 
 
 def save_loss(d, d1, d2, g, g1, g2, fm1, fm2, p, path, e):
@@ -134,3 +134,82 @@ def lr_lambda(epoch, decay_after=100):
     return 1. if epoch < decay_after else 1 - float(epoch - decay_after) / (200 - decay_after)
 
 
+def show_loss(src_dir):
+
+    sorted_disc_loss = sorted(glob.glob(os.path.join(src_dir, 'v*_d_loss.npy')))
+    sorted_gen_loss = sorted(glob.glob(os.path.join(src_dir, 'v*_g_loss.npy')))
+
+    sorted_gen1_loss = sorted(glob.glob(os.path.join(src_dir, 'v*_g1_loss.npy')))
+    sorted_gen2_loss = sorted(glob.glob(os.path.join(src_dir, 'v*_g2_loss.npy')))
+
+    sorted_disc1_loss = sorted(glob.glob(os.path.join(src_dir, 'v*_d1_loss.npy')))
+    sorted_disc2_loss = sorted(glob.glob(os.path.join(src_dir, 'v*_d2_loss.npy')))
+
+    sorted_fm1_loss = sorted(glob.glob(os.path.join(src_dir, 'v*_fm1_loss.npy')))
+    sorted_fm2_loss = sorted(glob.glob(os.path.join(src_dir, 'v*_fm2_loss.npy')))
+
+    sorted_p_loss = sorted(glob.glob(os.path.join(src_dir, 'v*_p_loss.npy')))
+
+    print('Reading all saved losses...')
+    print(sorted_disc_loss)
+    arr_g = np.array([])
+    arr_d = np.array([])
+
+    arr_g1 = np.array([])
+    arr_g2 = np.array([])
+    arr_d1 = np.array([])
+    arr_d2 = np.array([])
+
+    arr_fm1 = np.array([])
+    arr_fm2 = np.array([])
+    arr_p = np.array([])
+
+    for l in range(len(sorted_gen_loss)):
+        arr_g = np.concatenate([arr_g, np.load(sorted_gen_loss[l])])
+        arr_d = np.concatenate([arr_d, np.load(sorted_disc_loss[l])])
+
+        arr_d1 = np.concatenate([arr_d1, np.load(sorted_disc1_loss[l])])
+        arr_d2 = np.concatenate([arr_d2, np.load(sorted_disc2_loss[l])])
+        arr_g1 = np.concatenate([arr_g1, np.load(sorted_gen1_loss[l])])
+        arr_g2 = np.concatenate([arr_g2, np.load(sorted_gen2_loss[l])])
+
+        arr_fm1 = np.concatenate([arr_fm1, np.load(sorted_fm1_loss[l])])
+        arr_fm2 = np.concatenate([arr_fm2, np.load(sorted_fm2_loss[l])])
+        arr_p = np.concatenate([arr_p, np.load(sorted_p_loss[l])])
+
+    # plt.figure(figsize=(20,15))
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+    fig.set_size_inches(18.5, 10.5)
+
+    # ax1.subplot(122)
+    ax1.plot(np.arange(arr_d.shape[0]), arr_d, color='orange', label='Discriminator')
+    ax1.plot(np.arange(arr_g.shape[0]), arr_g, color='blue', label='Generator')
+    # ax1.ylabel("Loss")
+    # ax1.xlabel("Iteration")
+    ax1.legend()
+
+    # ax2.subplot(222)
+    ax2.plot(np.arange(arr_d1.shape[0]), arr_d1, color='orange', label='Discriminator 1')
+    ax2.plot(np.arange(arr_g1.shape[0]), arr_g1, color='blue', label='Generator 1')
+    # ax2.ylabel("Loss")
+    # ax2.xlabel("Iteration")
+    ax2.legend()
+
+    ax3.plot(np.arange(arr_d2.shape[0]), arr_d2, color='orange', label='Discriminator 2')
+    ax3.plot(np.arange(arr_g2.shape[0]), arr_g2, color='blue', label='Generator 2')
+    # ax3.ylabel("Loss")
+    # ax3.xlabel("Iteration")
+    ax3.legend()
+
+    # ax4.subplot(422)
+    ax4.plot(np.arange(arr_fm1.shape[0]), arr_fm1, color='orange', label='FM 1')
+    ax4.plot(np.arange(arr_fm2.shape[0]), arr_fm2, color='blue', label='FM 2')
+    ax4.plot(np.arange(arr_p.shape[0]), arr_p, color='green', label='P')
+    # ax4.ylabel("Loss")
+    # ax4.xlabel("Iteration")
+    ax4.legend()
+
+    for ax in fig.get_axes():
+        ax.label_outer()
+
+    plt.show()

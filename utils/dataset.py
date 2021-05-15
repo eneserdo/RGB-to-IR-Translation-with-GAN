@@ -36,11 +36,11 @@ class CustomDataset(Dataset):
             assert len(files3) == len(files2), f"files are different rgb:{len(files1)}, segment:{len(files3)}"
 
             self.composed_segment = transforms.Compose([transforms.ToTensor(),
-                                                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5,0.5))])
+                                                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
             print("Segment file is loaded")
 
-        self.L = len(files1)
+        self.Length = len(files1)
 
         self.sf=sf
 
@@ -50,11 +50,11 @@ class CustomDataset(Dataset):
         self.composed_ir = transforms.Compose([transforms.ToTensor(),
                                                transforms.Normalize((0.35), (0.18))])
 
-        print(f"Custom dataset initialized with {self.L} images")
+        print(f"Custom dataset initialized with {self.Length} images")
         print(f"Scaling factor: {self.sf} ")
 
     def __len__(self):
-        return self.L
+        return self.Length
 
     def __getitem__(self, index):
         rgb = (io.imread(os.path.join(self.rgb_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
@@ -76,7 +76,7 @@ class CustomDataset(Dataset):
 
 
 class TestDataset(Dataset):
-
+    # FIXME
     def __init__(self, root_dir, is_segment=False):
 
         self.is_segment=is_segment
