@@ -20,8 +20,9 @@ I designed generic classification network except that it yields a matrix of valu
 
 ## Training Details
 
-I trained the model for a 80 epochs with and without segmented input.
-I used Adam optimizer with learning rate of 0.0002 and 0.00004 for generator and discriminator respectively. 
+I trained the model for a 80 epochs with and without segmented input. I used Adam optimizer with learning rate of 0.0002 and 0.00004 for generator and discriminator respectively. Due to the limited resources, I resized the input image with a factor of 2.
+
+For training, Google Colab Pro Notebook environment was prefered.
 
 ## Result
 
