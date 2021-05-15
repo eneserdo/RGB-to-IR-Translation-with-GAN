@@ -111,6 +111,9 @@ def main(opt):
             # # # Updating Discriminator # # #
             optim_d.zero_grad()
 
+            if opt.segment:
+                ir_pred = t.cat([ir_pred, segment], dim=1)
+
             out1_pred, out2_pred = disc(ir_pred.detach())   # It returns a list [fms... + output]
 
             l_d_pred1, l_d_pred2 = loss(out1_pred[-1], out2_pred[-1], is_real=False)

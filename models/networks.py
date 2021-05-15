@@ -3,7 +3,7 @@ import torch.nn as nn
 from torchvision import models
 
 
-####### Generator #######
+# # # Generator # # #
 
 class Generator(nn.Module):
     def __init__(self, input_nc, output_nc, ngf=64, n_downsampling=3, n_blocks=7, norm_layer=nn.InstanceNorm2d, padding_type='reflect', transposed=False):
@@ -84,7 +84,8 @@ class ResnetBlock(nn.Module):
         return out
 
 
-####### Discriminator #######
+# # # Discriminator # # #
+
 class Discriminator(nn.Module):
     def __init__(self, input_nc=3, ndf=64, norm=nn.BatchNorm2d):
         super(Discriminator, self).__init__()
