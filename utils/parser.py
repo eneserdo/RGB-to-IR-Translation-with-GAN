@@ -1,25 +1,25 @@
 import argparse
 
+
 # Todo: Add option to disable fm loss
 
 
 class Parser:
     def __init__(self, des):
-        self.arg=argparse.ArgumentParser(description=des)
+        self.arg = argparse.ArgumentParser(description=des)
 
     def __call__(self):
-
         # Training Parameters
-        self.arg.add_argument('-ce', '--current_epoch',default=0, type=int,  help="Enter the epoch numper to continue the training")
+        self.arg.add_argument('-ce', '--current_epoch', default=0, type=int, help="Enter the epoch numper to continue the training")
         self.arg.add_argument('-bs', '--batch_size', type=int, default=10, help='Batch size')
         self.arg.add_argument('-te', '--training_epoch', type=int, default=10, help='Number of epochs to train')
 
         self.arg.add_argument('-sf', '--scale_factor', type=float, default=0.5, help='To scale the training images')
         self.arg.add_argument('-ls', '--lambda_second', type=float, default=1., help='Lambda of downsampled image loss')
         self.arg.add_argument('-lr', '--learning_rate', type=float, default=0.0002, help='Learning rate')
-        self.arg.add_argument('--transposed',default=False, help="Use transposed convolution")
-        self.arg.add_argument('-seg','--segment',default=False, help="Use segmentation images")
-        self.arg.add_argument('--loss',default='lsgan', help="Enter the loss type: lsgan or gan")
+        self.arg.add_argument('--transposed', default=False, help="Use transposed convolution")
+        self.arg.add_argument('-seg', '--segment', type=bool, default=False, help="Use segmentation images")
+        self.arg.add_argument('--loss', default='lsgan', help="Enter the loss type: lsgan or gan")
         self.arg.add_argument('--amp', type=bool, default=False, help='To use automatic mixed precision')
 
         # Directories
@@ -37,12 +37,12 @@ class Parser:
 
 class TestParser:
     def __init__(self):
-        self.arg=argparse.ArgumentParser()
+        self.arg = argparse.ArgumentParser()
 
     def __call__(self):
-
-        self.arg.add_argument('-ce', '--current_epoch', type=int, required=True, help="Enter the epoch numper of the models")
-        self.arg.add_argument('--segment',default=False, help="Use segmentation images")
+        self.arg.add_argument('-ce', '--current_epoch', type=int, required=True,
+                              help="Enter the epoch numper of the models")
+        self.arg.add_argument('--segment', default=False, help="Use segmentation images")
         self.arg.add_argument('--checkpoints_file', type=str, default='checkpoints', help='models directory to load')
         self.arg.add_argument('-o', '--out_file', type=str, default='test_results', help='Results are saved here')
         self.arg.add_argument('-i', '--inp_file', type=str, default='testset', help='Input images')
@@ -55,10 +55,9 @@ class TestParser:
 
 class ResizeParser:
     def __init__(self, des):
-        self.arg=argparse.ArgumentParser(description=des)
+        self.arg = argparse.ArgumentParser(description=des)
 
     def __call__(self):
-
         self.arg.add_argument('-o', '--out_dir', type=str, default='dataset', help='Results are saved here')
         self.arg.add_argument('-rgb', '--src_rgb', type=str, required=True, help='Input images')
         self.arg.add_argument('-ir', '--src_ir', type=str, required=True, help='Input images')
@@ -68,10 +67,9 @@ class ResizeParser:
 
 class SegmentParser:
     def __init__(self, des):
-        self.arg=argparse.ArgumentParser(description=des)
+        self.arg = argparse.ArgumentParser(description=des)
 
     def __call__(self):
-
         self.arg.add_argument('-o', '--out_dir', type=str, default='segment', help='Results are saved here')
         self.arg.add_argument('-i', '--src_rgb', type=str, required=True, help='Input images')
         self.arg.add_argument('-p', '--part', type=int, required=True, help='Part of the dataset')

@@ -102,6 +102,8 @@ def main(opt):
             if opt.segment:
                 segment = data[2].to(device)
                 condition = t.cat([rgb, segment], dim=1)
+                ir = t.cat([ir, segment], dim=1)
+
             else:
                 condition = rgb
 
