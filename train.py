@@ -102,21 +102,25 @@ def main(opt):
             if opt.segment:
                 segment = data[2].to(device)
                 condition = t.cat([rgb, segment], dim=1)
-                ir = t.cat([ir, segment], dim=1)
+                ir_ = t.cat([ir, segment], dim=1)
 
             else:
                 condition = rgb
+                ir_=ir
 
-            out1, out2 = disc(ir)
+            out1, out2 = disc(ir_)
             ir_pred = gen(condition)
 
             # # # Updating Discriminator # # #
             optim_d.zero_grad()
 
             if opt.segment:
-                ir_pred = t.cat([ir_pred, segment], dim=1)
+                ir_pred_ = t.cat([ir_pred, segment], dim=1)
+            else:
+                ir_pred_ = ir_pred
 
-            out1_pred, out2_pred = disc(ir_pred.detach())   # It returns a list [fms... + output]
+
+            out1_pred, out2_pred = disc(ir_pred_.detach())   # It returns a list [fms... + output]
 
             l_d_pred1, l_d_pred2 = loss(out1_pred[-1], out2_pred[-1], is_real=False)
             l_d_real1, l_d_real2 = loss(out1[-1], out2[-1], is_real=True)
@@ -137,7 +141,7 @@ def main(opt):
             # # # Updating Generator # # #
             optim_g.zero_grad()
 
-            out1_pred, out2_pred = disc(ir_pred)    # It returns a list [fms... + output]
+            out1_pred, out2_pred = disc(ir_pred_)    # It returns a list [fms... + output]
 
             fm_scale1 = loss_fm(out1_pred[:-1], out1[:-1])
             fm_scale2 = loss_fm(out2_pred[:-1], out2[:-1])
