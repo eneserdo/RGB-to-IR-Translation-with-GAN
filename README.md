@@ -2,7 +2,7 @@
 
 CURRENTLY IMPLEMENTING! THIS IS AN EXPERIMENTAL MODEL SO NOT YET READY TO USE!
 
-I designed and implemented a generative adversarial network (GAN) network to translate optical (RGB) image to infrared (IR) image. 
+I designed and implemented a generative adversarial network (GAN) to translate optical (RGB) image to infrared (IR) image. 
 
 This project was done within the scope of my graduation project.
 
