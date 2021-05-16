@@ -39,9 +39,8 @@ def save_tensor_images(image_tensor, i, save_dir, prefix, resize_factor=0.5):
         else:
             raise TypeError("Name error")
 
-
-        print(max(image_tensor.detach().cpu()))
-        print(min(image_tensor.detach().cpu()))
+        print("\nMean and Std of " + prefix)
+        print(t.mean(image_tensor.detach().cpu()), t.std(image_tensor.detach().cpu()))
 
         # image_tensor = (image_tensor + 1) / 2
         image_unflat = image_tensor.detach().cpu() * std + mean

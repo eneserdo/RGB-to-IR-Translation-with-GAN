@@ -48,13 +48,13 @@ def main(opt):
     if opt.current_epoch != 0:
         disc.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"e_{opt.current_epoch:0>3d}_discriminator.pth")))
         gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"e_{opt.current_epoch:0>3d}_generator.pth")))
-        print(f"e_{opt.current_epoch:0>3d}_generator.pth was loaded")
-        print(f"e_{opt.current_epoch:0>3d}_discriminator.pth was loaded")
+        print(f"- e_{opt.current_epoch:0>3d}_generator.pth was loaded! -")
+        print(f"- e_{opt.current_epoch:0>3d}_discriminator.pth was loaded! -")
 
     else:
         disc.apply(utils.weights_init)
         gen.apply(utils.weights_init)
-        print("Weights are initialized")
+        print("- Weights are initialized from scratch -")
 
     # Losses to track
     # # Main losses
@@ -106,7 +106,7 @@ def main(opt):
 
             else:
                 condition = rgb
-                ir_=ir
+                ir_ = ir
 
             out1, out2 = disc(ir_)
             ir_pred = gen(condition)
