@@ -170,6 +170,7 @@ def main(opt):
                 utils.save_tensor_images(ir_pred, i, opt.results_file, 'pred')
                 utils.save_tensor_images(ir, i, opt.results_file, 'ir')
                 utils.save_tensor_images(rgb, i, opt.results_file, 'rgb')
+                utils.save_tensor_images(segment, i, opt.results_file, 'segment')
                 print('\nExample images saved')
 
                 print("Losses:")

@@ -28,23 +28,20 @@ def save_tensor_images(image_tensor, i, save_dir, prefix, resize_factor=0.5):
             mean = 0.35
             std = 0.18
 
-        elif prefix == "pred":
+        elif prefix == "pred" :
             mean = 0.5
             std = 0.5
 
-
         elif prefix == "segment":
-            raise ValueError("Not implemented")
+            image_unflat = (image_tensor.detach().cpu() + 1) / 2
 
         else:
             raise TypeError("Name error")
 
-        print("\nMean and Std of " + prefix)
-        print(t.mean(image_tensor.detach().cpu()), t.std(image_tensor.detach().cpu()))
-
-        # image_tensor = (image_tensor + 1) / 2
-        image_unflat = image_tensor.detach().cpu() * std + mean
-        # image_unflat = image_tensor.detach().cpu()
+        if prefix != "segment":
+            # print("\nMean and Std of " + prefix)
+            # print(t.mean(image_tensor.detach().cpu().item()), t.std(image_tensor.detach().cpu()).item())
+            image_unflat = image_tensor.detach().cpu() * std + mean
 
         image_grid = make_grid(image_unflat, nrow=3)
 
