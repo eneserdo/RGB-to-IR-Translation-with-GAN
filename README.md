@@ -23,8 +23,12 @@ Please use the ```-h ```command without further ado. This code designed for FLIR
 
 ## Train
 
-The dataset directory must have two folder named "rgb" and "ir"
+The dataset directory must have two folder named "rgb", "ir, and also optionally "segment".
 
+dataset  
+├───ir  
+├───rgb  
+└───segment  
 ```
 python train.py -i $dataset_directory
 ```
