@@ -12,13 +12,15 @@ To improve the result further, I used semantic segmantation of the input image, 
 
 ## The Generator Model
 
-<img src="disc.png" alt="hi" class="inline"  width=400px height= auto>
+<img src="gen.png" alt="hi" class="center"  width=auto height= 400px>
 
 The generator was adopted from style transfer network. Additionally, feature matching loss and perceptual loss was used.
 
 ## The Multi-Scale Discriminator Model
 
 I designed generic classification network except that it yields a matrix of values, so it works like a PatchGAN. I downsampled the image and used second discriminator so that first scale discriminator scores the local features and second scale discriminator scores the relatively global featureas. 
+
+<img src="disc.png" alt="hi" class="center"  width=auto height= 400px>
 
 ## Training Details
 
