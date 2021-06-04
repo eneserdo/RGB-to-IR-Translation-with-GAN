@@ -12,7 +12,7 @@ To improve the result further, I used semantic segmantation of the input image, 
 
 ## The Generator Model
 
-<img src="gen.png" alt="hi" class="center"  width=auto height= 400px>
+<img src="gen.png" alt="hi" class="center"  width=auto height= 350px>
 
 The generator was adopted from style transfer network. Additionally, feature matching loss and perceptual loss was used.
 
@@ -20,11 +20,11 @@ The generator was adopted from style transfer network. Additionally, feature mat
 
 I designed generic classification network except that it yields a matrix of values, so it works like a PatchGAN. I downsampled the image and used second discriminator so that first scale discriminator scores the local features and second scale discriminator scores the relatively global featureas. 
 
-<img src="disc.png" alt="hi" class="center"  width=auto height= 400px>
+<img src="disc.png" alt="hi" class="center"  width=auto height= 350px>
 
 ## Training Details
 
-I trained the model for a 80 epochs with and without segmented input. I used Adam optimizer with learning rate of 0.0002 and 0.00004 for generator and discriminator respectively. Due to the limited resources, I resized the input image with a factor of 2.
+I trained the model for a 100 epochs with and without segmented input. I used Adam optimizer with learning rate of 0.0002 and 0.00004 for generator and discriminator respectively. Due to the limited resources, I resized the input image with a factor of 2.
 
 For training, Google Colab Pro Notebook environment was prefered.
 
