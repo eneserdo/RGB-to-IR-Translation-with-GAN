@@ -12,7 +12,7 @@ To improve the result further, I used semantic segmantation of the input image, 
 
 ## The Generator Model
 
-<img src="disc.png" alt="hi" class="inline"/  width=400px height= auto>
+<img src="disc.png" alt="hi" class="inline"  width=400px height= auto>
 
 The generator was adopted from style transfer network. Additionally, feature matching loss and perceptual loss was used.
 
