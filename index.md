@@ -12,6 +12,8 @@ To improve the result further, I used semantic segmantation of the input image, 
 
 ## The Generator Model
 
+<img src="disc.png" alt="hi" class="inline"/>
+
 The generator was adopted from style transfer network. Additionally, feature matching loss and perceptual loss was used.
 
 ## The Multi-Scale Discriminator Model
