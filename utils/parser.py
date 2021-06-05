@@ -42,7 +42,7 @@ class TestParser:
     def __call__(self):
         self.arg.add_argument('-ce', '--current_epoch', type=int, required=True,
                               help="Enter the epoch numper of the models")
-        self.arg.add_argument('--segment', default=False, help="Use segmentation images")
+        self.arg.add_argument('--segment',type=bool, default=False, help="Use segmentation images")
         self.arg.add_argument('--checkpoints_file', type=str, default='checkpoints', help='models directory to load')
         self.arg.add_argument('-o', '--out_file', type=str, default='test_results', help='Results are saved here')
         self.arg.add_argument('-i', '--inp_file', type=str, default='testset', help='Input images')

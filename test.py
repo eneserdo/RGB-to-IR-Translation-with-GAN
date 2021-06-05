@@ -11,6 +11,7 @@ from utils import parser, utils, dataset
 
 
 def main(opt):
+    print(opt)
 
     nf = 64
     n_blocks = 6
