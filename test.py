@@ -12,7 +12,7 @@ from utils import parser, utils, dataset
 
 def main(opt):
 
-    ngf = 64
+    nf = 64
     n_blocks = 6
 
     # Load the networks
@@ -23,19 +23,26 @@ def main(opt):
 
     print(f"Device: {device}")
 
-    gen = networks.Generator(input_nc=3, output_nc=1, ngf=ngf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
+    if opt.segment:
+        gen = networks.Generator(input_nc=6, output_nc=1, ngf=nf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
+    else:
+        gen = networks.Generator(input_nc=3, output_nc=1, ngf=nf, n_blocks=n_blocks, transposed=opt.transposed).to(device)
 
     gen.load_state_dict(t.load(os.path.join(opt.checkpoints_file, f"e_{opt.current_epoch:0>3d}_generator.pth")))
 
     gen.eval()
 
     try:
-        ds = dataset.CustomDataset(root_dir=opt.inp_file, sf=opt.scale_factor)
+        ds = dataset.CustomDataset(root_dir=opt.inp_file, sf=opt.scale_factor, is_segment=opt.segment)
     except:
+        raise NotImplementedError
         print("IR images not found but it is ok")
         ds = dataset.TestDataset(root_dir=opt.inp_file)
 
-    dataloader = DataLoader(ds, batch_size=opt.batch_size, shuffle=False, num_workers=2)
+    dataloader = DataLoader(ds, batch_size=1, shuffle=False, num_workers=2)
+
+    if opt.batch_size!=1:
+        print("Batch size other than 1, is not implemented yet")
 
     i = 0
 
@@ -46,7 +53,6 @@ def main(opt):
             rgb = data[0].to(device)
             ir = data[1]
 
-
             if opt.segment:
                 segment = data[-1].to(device)
                 condition = t.cat([rgb, segment], dim=1)
@@ -54,7 +60,11 @@ def main(opt):
                 condition = rgb
 
             ir_pred = gen(condition)
-            utils.save_all_images(rgb, ir, ir_pred, i, opt.out_file, resize_factor=1.)
+
+            if opt.segment:
+                utils.save_all_images(rgb, ir, ir_pred,  i, opt.out_file, segment=segment, resize_factor=0.5)
+            else:
+                utils.save_all_images(rgb, ir, ir_pred, i, opt.out_file, resize_factor=0.5)
 
     print("Done!")
 

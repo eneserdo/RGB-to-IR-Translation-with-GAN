@@ -46,7 +46,7 @@ class TestParser:
         self.arg.add_argument('--checkpoints_file', type=str, default='checkpoints', help='models directory to load')
         self.arg.add_argument('-o', '--out_file', type=str, default='test_results', help='Results are saved here')
         self.arg.add_argument('-i', '--inp_file', type=str, default='testset', help='Input images')
-        self.arg.add_argument('-sf', '--scale_factor', type=float, default=1, help='To scale the training images')
+        self.arg.add_argument('-sf', '--scale_factor', type=float, default=0.5, help='To scale the training images')
         self.arg.add_argument('-bs', '--batch_size', type=int, default=1, help='Batch size')
         self.arg.add_argument('--transposed', default=False, help="Use transposed convolution")
 

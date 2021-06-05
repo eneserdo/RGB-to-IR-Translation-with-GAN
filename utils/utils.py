@@ -28,7 +28,7 @@ def save_tensor_images(image_tensor, i, save_dir, prefix, resize_factor=0.5):
             mean = 0.35
             std = 0.18
 
-        elif prefix == "pred" :
+        elif prefix == "pred":
             mean = 0.5
             std = 0.5
 
@@ -39,8 +39,6 @@ def save_tensor_images(image_tensor, i, save_dir, prefix, resize_factor=0.5):
             raise TypeError("Name error")
 
         if prefix != "segment":
-            # print("\nMean and Std of " + prefix)
-            # print(t.mean(image_tensor.detach().cpu().item()), t.std(image_tensor.detach().cpu()).item())
             image_unflat = image_tensor.detach().cpu() * std + mean
 
         image_grid = make_grid(image_unflat, nrow=3)
@@ -52,22 +50,25 @@ def save_tensor_images(image_tensor, i, save_dir, prefix, resize_factor=0.5):
         name = prefix + str(i) + r'.jpg'
         io.imsave(os.path.join(save_dir, name), img)
 
-def save_all_images(rgb, ir, pred, i, save_dir, resize_factor=0.5):
+
+def save_all_images(rgb, ir, pred, i, save_dir, segment=None, resize_factor=0.5):
     with t.no_grad():
 
         mean_rgb = t.tensor([0.34, 0.33, 0.35]).reshape(1, 3, 1, 1)
         std_rgb = t.tensor([0.19, 0.18, 0.18]).reshape(1, 3, 1, 1)
+        rgb_n = rgb.detach().cpu() * std_rgb + mean_rgb
 
         mean_ir = 0.35
         std_ir = 0.18
-
         ir_n = ir.detach().cpu() * std_ir + mean_ir
 
-        pred_n = pred.detach().cpu() * std_ir + mean_ir
+        pred_n = pred.detach().cpu() * 0.5 + 0.5
 
-        rgb_n = rgb.detach().cpu() * std_rgb + mean_rgb
-
-        image_unflat = t.cat([pred_n, ir_n, rgb_n], dim=0)
+        if segment:
+            segment_n = segment.detach().cpu() * 0.5 + 0.5
+            image_unflat = t.cat([pred_n, ir_n, rgb_n, segment_n], dim=0)
+        else:
+            image_unflat = t.cat([pred_n, ir_n, rgb_n], dim=0)
 
         image_grid = make_grid(image_unflat, nrow=2)
 
