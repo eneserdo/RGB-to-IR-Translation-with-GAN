@@ -61,10 +61,12 @@ def save_all_images(rgb, ir, pred, i, save_dir, segment=None, resize_factor=0.5)
         mean_ir = 0.35
         std_ir = 0.18
         ir_n = ir.detach().cpu() * std_ir + mean_ir
+        ir_n = t.cat([ir_n, ir_n, ir_n], dim=1)
 
         pred_n = pred.detach().cpu() * 0.5 + 0.5
+        pred_n = t.cat([pred_n, pred_n, pred_n], dim=1)
 
-        if segment:
+        if segment is not None:
             segment_n = segment.detach().cpu() * 0.5 + 0.5
             image_unflat = t.cat([pred_n, ir_n, rgb_n, segment_n], dim=0)
         else:
