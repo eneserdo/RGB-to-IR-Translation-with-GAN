@@ -25,8 +25,8 @@ def save_tensor_images(image_tensor, i, save_dir, prefix, resize_factor=0.5):
             std = t.tensor([0.19, 0.18, 0.18]).reshape(1, 3, 1, 1)
 
         elif prefix == "ir":
-            mean = 0.35
-            std = 0.18
+            mean = 0.5
+            std = 0.5
 
         elif prefix == "pred":
             mean = 0.5
@@ -58,8 +58,8 @@ def save_all_images(rgb, ir, pred, i, save_dir, segment=None, resize_factor=0.5)
         std_rgb = t.tensor([0.19, 0.18, 0.18]).reshape(1, 3, 1, 1)
         rgb_n = rgb.detach().cpu() * std_rgb + mean_rgb
 
-        mean_ir = 0.35
-        std_ir = 0.18
+        mean_ir = 0.5
+        std_ir = 0.5
         ir_n = ir.detach().cpu() * std_ir + mean_ir
         ir_n = t.cat([ir_n, ir_n, ir_n], dim=1)
 
@@ -80,7 +80,6 @@ def save_all_images(rgb, ir, pred, i, save_dir, segment=None, resize_factor=0.5)
         img = cv2.resize(img, (0, 0), fx=resize_factor, fy=resize_factor)
 
         io.imsave(os.path.join(save_dir, f"super{i:0>4d}.jpg"), img)
-
 
 
 def save_model(disc, gen, cur_epoch, save_dir):
@@ -134,7 +133,6 @@ def lr_lambda(epoch, decay_after=100):
 
 
 def show_loss(src_dir):
-
     sorted_disc_loss = sorted(glob.glob(os.path.join(src_dir, 'v*_d_loss.npy')))
     sorted_gen_loss = sorted(glob.glob(os.path.join(src_dir, 'v*_g_loss.npy')))
 

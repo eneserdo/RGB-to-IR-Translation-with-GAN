@@ -6,7 +6,8 @@ from torchvision import models
 # # # Generator # # #
 
 class Generator(nn.Module):
-    def __init__(self, input_nc, output_nc, ngf=64, n_downsampling=3, n_blocks=7, norm_layer=nn.InstanceNorm2d, padding_type='reflect', transposed=False):
+    def __init__(self, input_nc, output_nc, ngf=64, n_downsampling=3, n_blocks=7, norm_layer=nn.InstanceNorm2d,
+                 padding_type='reflect', transposed=False):
 
         assert (n_blocks >= 0)
         super(Generator, self).__init__()
@@ -31,11 +32,12 @@ class Generator(nn.Module):
             mult = 2 ** (n_downsampling - i)
             if transposed:
                 model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2), kernel_size=3, stride=2, padding=1,
-                                            output_padding=1),
-                        norm_layer(int(ngf * mult / 2)), activation]
+                                             output_padding=1),
+                          norm_layer(int(ngf * mult / 2)), activation]
             else:
-                model += [nn.Upsample(scale_factor=2),nn.Conv2d(ngf * mult, int(ngf * mult / 2), kernel_size=3, padding=1),
-                        norm_layer(int(ngf * mult / 2)), activation]
+                model += [nn.Upsample(scale_factor=2),
+                          nn.Conv2d(ngf * mult, int(ngf * mult / 2), kernel_size=3, padding=1),
+                          norm_layer(int(ngf * mult / 2)), activation]
         model += [nn.ReflectionPad2d(3), nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0), nn.Tanh()]
         self.model = nn.Sequential(*model)
 
@@ -94,9 +96,9 @@ class Discriminator(nn.Module):
 
         self.d1 = self._conv_block(input_nc, ndf, k=5, norm=norm, p=2)
 
-        self.d2 = self._conv_block(ndf, ndf*2, k=3, norm=norm, pool=True)
+        self.d2 = self._conv_block(ndf, ndf * 2, k=3, norm=norm, pool=True)
 
-        self.d3 = self._conv_block(ndf*2, ndf * 4, k=3, norm=norm)
+        self.d3 = self._conv_block(ndf * 2, ndf * 4, k=3, norm=norm)
 
         self.d4 = self._conv_block(ndf * 4, ndf * 8, k=3, norm=norm, pool=True, drop=True)
 
@@ -133,14 +135,14 @@ class MultiScaleDisc(nn.Module):
     def __init__(self, input_nc=2, ndf=64, norm=nn.BatchNorm2d):
         super(MultiScaleDisc, self).__init__()
 
-        self.disc1=Discriminator(input_nc, ndf, norm)
-        self.disc2=Discriminator(input_nc, ndf, norm)
+        self.disc1 = Discriminator(input_nc, ndf, norm)
+        self.disc2 = Discriminator(input_nc, ndf, norm)
 
         self.downsample = nn.AvgPool2d(3, stride=2, padding=1, count_include_pad=False)
 
     def forward(self, x):
-        fm1=self.disc1(x)
-        fm2=self.disc2(self.downsample(x))
+        fm1 = self.disc1(x)
+        fm2 = self.disc2(self.downsample(x))
 
         return fm1, fm2
 
@@ -178,4 +180,3 @@ class Vgg19(t.nn.Module):
         h_relu5 = self.slice5(h_relu4)
         out = [h_relu1, h_relu2, h_relu3, h_relu4, h_relu5]
         return out
-

@@ -13,7 +13,6 @@ class VGGLoss(nn.Module):
         self.weights = [1.0 / 32, 1.0 / 16, 1.0 / 8, 1.0 / 4, 1.0]
 
     def forward(self, x, y):
-
         x = t.cat([x, x, x], dim=1)
         y = t.cat([y, y, y], dim=1)
 

@@ -1,8 +1,10 @@
-import torch as t
+import cv2
+import os
+
+import numpy as np
 from skimage import io
-import os, cv2
-from torchvision import transforms
 from torch.utils.data import Dataset
+from torchvision import transforms
 
 
 # import fnmatch
@@ -12,7 +14,7 @@ class CustomDataset(Dataset):
 
     def __init__(self, root_dir, is_segment=False, sf=1):
 
-        self.is_segment=is_segment
+        self.is_segment = is_segment
 
         self.rgb_dir = os.path.join(root_dir, 'rgb')
         self.ir_dir = os.path.join(root_dir, 'ir')
@@ -42,13 +44,13 @@ class CustomDataset(Dataset):
 
         self.Length = len(files1)
 
-        self.sf=sf
+        self.sf = sf
 
         self.composed_rgb = transforms.Compose([transforms.ToTensor(),
-                                                transforms.Normalize((0.34, 0.33, 0.35), (0.19, 0.18, 0.18))])
+                                                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
         self.composed_ir = transforms.Compose([transforms.ToTensor(),
-                                               transforms.Normalize((0.35), (0.18))])
+                                               transforms.Normalize(0.5, 0.5)])
 
         print(f"Custom dataset initialized with {self.Length} images")
         print(f"Scaling factor: {self.sf} ")
@@ -57,16 +59,17 @@ class CustomDataset(Dataset):
         return self.Length
 
     def __getitem__(self, index):
-        rgb = (io.imread(os.path.join(self.rgb_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
-        rgb=cv2.resize(rgb, (0,0), fx=self.sf, fy=self.sf)
+        rgb = (io.imread(os.path.join(self.rgb_dir, f"IMG_{index:0>4d}.png"))) / 255.0
+        rgb = cv2.resize(rgb, (0, 0), fx=self.sf, fy=self.sf)
         rgb = self.composed_rgb(rgb)
 
-        ir = (io.imread(os.path.join(self.ir_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
-        ir=cv2.resize(ir, (0,0), fx=self.sf, fy=self.sf)
-        ir = self.composed_ir(ir[:,:,0])
+        ir = np.load(os.path.join(self.ir_dir, f"IMG_{index:0>4d}.npy"))
+        ir = (ir - np.min(ir)) / (np.max(ir) - np.min(ir))
+        ir = cv2.resize(ir, (0, 0), fx=self.sf, fy=self.sf)
+        ir = self.composed_ir(ir)
 
         if self.is_segment:
-            segment = (io.imread(os.path.join(self.segment_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
+            segment = (io.imread(os.path.join(self.segment_dir, f"IMG_{index:0>4d}.png"))) / 255.0
             segment = cv2.resize(segment, (0, 0), fx=self.sf, fy=self.sf)
             segment = self.composed_segment(segment)
 
@@ -75,13 +78,14 @@ class CustomDataset(Dataset):
         return [rgb.float(), ir.float()]
 
 
+# FIXME
 class TestDataset(Dataset):
-    # FIXME
     def __init__(self, root_dir, is_segment=False):
 
-        self.is_segment=is_segment
+        self.is_segment = is_segment
 
-        self.composed_rgb = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.34, 0.33, 0.35), (0.19, 0.18, 0.18))])
+        self.composed_rgb = transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize((0.34, 0.33, 0.35), (0.19, 0.18, 0.18))])
 
         self.rgb_dir = os.path.join(root_dir, 'rgb')
 
@@ -103,12 +107,12 @@ class TestDataset(Dataset):
         return self.L
 
     def __getitem__(self, index):
-        rgb = (io.imread(os.path.join(self.rgb_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
+        rgb = (io.imread(os.path.join(self.rgb_dir, f"/IMG_{i:0>4d}.png"))) / 255.0
         # rgb = (io.imread(os.path.join(self.rgb_dir, f'{index}.jpg'))) / 255.0
         rgb = self.composed_rgb(rgb)
 
         if self.is_segment:
-            segment = (io.imread(os.path.join(self.segment_dir, f"FLIR_{index:0>5d}.jpg"))) / 255.0
+            segment = (io.imread(os.path.join(self.segment_dir, f"/IMG_{i:0>4d}.png"))) / 255.0
             segment = cv2.resize(segment, (0, 0), fx=self.sf, fy=self.sf)
             segment = self.composed_segment(segment)
 
