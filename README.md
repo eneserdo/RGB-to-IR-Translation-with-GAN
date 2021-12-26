@@ -6,7 +6,7 @@ This project was done within the scope of my graduation project.
 
 Check out the [project webpage](https://eneserdo.github.io/RGB-to-IR-Translation-with-GAN/) for details
 
-Here is the project [reports](https://github.com/eneserdo/RGB-to-IR-Translation-with-GAN/blob/master/Graduation%20Project.pdf)
+Here is the project [report](https://github.com/eneserdo/RGB-to-IR-Translation-with-GAN/blob/master/Graduation%20Project.pdf)
 
 ## Requirements
 
