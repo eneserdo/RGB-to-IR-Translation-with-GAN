@@ -1,12 +1,12 @@
 # RGB-to-IR-Translation-with-GAN
 
-CURRENTLY IMPLEMENTING! THIS IS AN EXPERIMENTAL MODEL SO NOT YET READY TO USE!
-
 I designed and implemented a generative adversarial network (GAN) to translate optical (RGB) image to infrared (IR) image. 
 
 This project was done within the scope of my graduation project.
 
 Check out the [project webpage](https://eneserdo.github.io/RGB-to-IR-Translation-with-GAN/) for details
+
+Here is the project [reports](https://github.com/eneserdo/RGB-to-IR-Translation-with-GAN/blob/master/Graduation%20Project.pdf)
 
 ## Requirements
 
