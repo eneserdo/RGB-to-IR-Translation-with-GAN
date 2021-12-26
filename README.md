@@ -55,3 +55,8 @@ To deal with this problem, you can use the following command to make the images 
 ```
 python img_resize.py -rgb $RGB_image_dir -ir $IR_image_dir
 ```
+
+## Acknowledgement
+
+I would like to thank my advisors Prof. Hakan Ali ÇIRPAN and Dr. Sedat ÖZER who assisted me to research such a pleasant field. Also, I would like to thank them for their guidance and help throughout the project.
+
