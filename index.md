@@ -16,6 +16,8 @@ We used [FLIR Thermal Dataset](https://www.flir.com/oem/adas/adas-dataset-form/)
 
 Note that semantic segmantation was done by the means of PSPNET pretrained on cityscapes dataset which is a similar to FLIR thermal dataset in terms of objects they contained.
 
+Unfortunately, image pairs in the dataset has slight alignment problem which was solved emprically. Alternatively, a homography matrix could have also been used to align. 
+
 
 ## The Generator Model
 
@@ -62,6 +64,8 @@ For training, Google Colab Pro Notebook environment was prefered.
 
 
 As can be seen, two types of distortion in the images can be noticed — ghosting and a kind of fixed-pattern noise. Also, the image segmentation network did not work perfectly, so it affected the performance of the model.
+
+## Possible Improvements
 
 To improve the results, there are many hyper-parameters to tune. Also, loss function can be changed to Wasserstein loss or another loss in the literature. 
 
