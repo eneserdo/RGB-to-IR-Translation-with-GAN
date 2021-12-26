@@ -54,7 +54,7 @@ For training, Google Colab Pro Notebook environment was prefered.
 
 1st row: predicted IR, Ground truth IR, and 2nd row: RGB, segmented RGB.
 
-<img src="res1.jpg" class="center"  width=auto height= 350px>
+<img src="res1.png" class="center"  width=auto height= 350px>
 
 <img src="res2.jpg" class="center"  width=auto height= 350px>
 
