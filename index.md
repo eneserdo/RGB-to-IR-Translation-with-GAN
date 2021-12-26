@@ -1,7 +1,6 @@
 # RGB2IR Image Translation with Generative Adversarial Network
 
 This project aims to create partially novel generative adversarial network model that can translate RGB image to the IR image.
-adsafs
 
 
 ## Motivation and the Rationale
