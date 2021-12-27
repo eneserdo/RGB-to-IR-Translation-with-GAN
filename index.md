@@ -3,7 +3,7 @@
 This project aims to create partially novel generative adversarial network model that can translate RGB image to the IR image.
 
 
-## Motivation and the Rationale
+## Motivation and Rationale
 
 IR imaging is used in many crucial applications such as, surveillance, UAVs, search and rescue operations etcetera. To improve their abilities, most of these systems depend on deep learning models. Due to the nature of deep learning, they need a huge amount of data for training. However, IR images are hard to obtain due to the high cost of IR cameras. Moreover, even with a camera, obtaining images for specific scenarios could be very time-consuming. Thus, we want to create a model that can translate any RGB image to IR image with high quality such that it can be used as data augmentation method.
 
